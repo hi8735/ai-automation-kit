@@ -14,7 +14,6 @@ Claude Code 와 대화하면서 **내 업무 중 무엇을 자동화할 수 있�
 
 - **Claude Code** 가 설치되어 있고 로그인되어 있어야 합니다 (Claude 유료 플랜).
   - 아직 없으면: https://hi8735.github.io/ai-automation-kit/install.html
-  - 터미널에서 쓰는 Claude Code, 또는 **Claude 데스크톱 앱의 Code** 둘 다 됩니다.
 
 ---
 
@@ -35,13 +34,9 @@ Claude Code 와 대화하면서 **내 업무 중 무엇을 자동화할 수 있�
 
 ## 2. Claude Code 실행
 
-### 터미널에서 쓰는 경우
 - **Windows:** 키트 폴더(`CLAUDE.md` 가 보이는 폴더)를 연 상태에서, 위쪽 주소창에 `cmd` 라고 치고 Enter → 열린 창에 `claude` 입력 후 Enter.
 - **Mac:** Finder 에서 키트 폴더를 오른쪽 클릭 → **폴더에서 새로운 터미널 열기** → `claude` 입력 후 Enter.
   - 메뉴가 안 보이면: 터미널을 열고 `cd ` (cd 다음 한 칸 띄우기) 를 친 뒤 키트 폴더를 터미널 창에 끌어다 놓고 Enter → `claude` 입력.
-
-### 데스크톱 앱에서 쓰는 경우
-- Claude 데스크톱 앱 → **Code** → 작업 폴더로 키트 폴더(`CLAUDE.md` 가 보이는 폴더)를 선택.
 
 ⚠️ 처음 실행하면 **"이 폴더를 신뢰하시겠습니까? (Do you trust the files in this folder?)"** 같은 질문이 나와요 → 꼭 **예(Yes)** 를 선택하세요. 이걸 눌러야 키트가 제대로 동작해요.
 
