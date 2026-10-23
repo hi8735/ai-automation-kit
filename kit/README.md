@@ -6,11 +6,14 @@ Claude Code 와 대화하면서 **내 업무 중 무엇을 자동화할 수 있�
 - 끝나면 진행자에게 보낼 리포트가 만들어집니다. **회사 정보는 모두 지운 형태**이고, 보내기 전에 직접 확인합니다.
 - 미리 리포트를 보내주신 분들 중에서 모임 당일 1:1 로 더 깊게 봐드립니다.
 
+📖 그림과 예시가 있는 사용설명서: https://hi8735.github.io/ai-automation-kit/
+
 ---
 
 ## 시작하기 전에 필요한 것
 
 - **Claude Code** 가 설치되어 있고 로그인되어 있어야 합니다 (Claude 유료 플랜).
+  - 아직 없으면: https://hi8735.github.io/ai-automation-kit/install.html
   - 터미널에서 쓰는 Claude Code, 또는 **Claude 데스크톱 앱의 Code** 둘 다 됩니다.
 
 ---

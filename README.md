@@ -6,6 +6,10 @@ Claude Code 와 대화하면서 **내 업무 중 무엇을 자동화할 수 있�
 - 조건이 맞으면 그 자리에서 자동화를 만들고, 내 샘플 파일로 시험까지 합니다.
 - 끝나면 회사 정보를 지운 리포트를 만들어 진행자에게 보낼 수 있습니다.
 
+## 사용설명서
+
+📖 **https://hi8735.github.io/ai-automation-kit/** — 처음이라면 여기부터. Claude Code 설치 가이드도 있어요.
+
 ## 받기
 
 👉 **[키트 다운로드 (zip)](https://github.com/hi8735/ai-automation-kit/releases/latest/download/ai-automation-kit.zip)**

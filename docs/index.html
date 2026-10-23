@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="ko" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 업무자동화 키트 — 사용설명서</title>
+<meta name="description" content="Claude Code 와 대화하며 내 업무 중 무엇을 자동화할 수 있는지 찾고, 첫 자동화까지 직접 만들어보는 키트. 비개발자를 위한 사용설명서.">
+<meta property="og:title" content="AI 업무자동화 키트 — 사용설명서">
+<meta property="og:description" content="내 업무, 어디까지 자동화될까? Claude 가 1:1 인터뷰처럼 물어보며 찾아드려요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23e8590c'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='16' font-weight='700' fill='white'>/</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="brand-mark">/</span>AI 업무자동화 키트</a>
+    <nav class="topnav" aria-label="섹션">
+      <a class="hide-sm" href="#start">시작하기</a>
+      <a class="hide-sm" href="#inside">안에서 일어나는 일</a>
+      <a class="hide-sm" href="#example">예시</a>
+      <a href="#faq">막혔을 때</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ═══ 히어로 ═══ -->
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">비개발자를 위한 Claude Code 키트</span>
+      <h1>내 업무,<br><em>어디까지</em> 자동화될까?</h1>
+      <p class="lede">Claude 가 1:1 인터뷰처럼 하나씩 물어보면서, 익숙해서 눈에 안 보이던 반복 업무를 찾아냅니다. 조건이 맞으면 그 자리에서 첫 자동화까지 만들어 봐요.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/hi8735/ai-automation-kit/releases/latest/download/ai-automation-kit.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          키트 다운로드 (zip)
+        </a>
+        <a class="btn btn-ghost" href="#start">시작 방법 보기</a>
+      </div>
+      <div class="hero-meta">
+        <span>걸리는 시간 <b>30~60분</b></span>
+        <span>필요한 것 <b>Claude 유료 플랜 + Claude Code</b></span>
+        <span>Windows · Mac</span>
+      </div>
+      <a class="install-callout" href="install.html">
+        <span class="ic" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15181f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m7 9 3 2-3 2"/><path d="M12 14h4"/></svg>
+        </span>
+        <span><b>Claude Code 가 아직 없으신가요?</b><small>처음이어도 10분이면 돼요 — 설치 가이드 보기</small></span>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+
+    <div class="term" aria-label="키트를 실행했을 때의 화면 예시">
+      <div class="term-bar"><i></i><i></i><i></i><span>ai-automation-kit — claude</span></div>
+      <div class="term-body">
+        <p class="t-line t-user" style="animation-delay:.2s">/start</p>
+        <p class="t-line t-claude" style="animation-delay:.9s">시작하기 전에 하나만 골라주세요.<br><b>1.</b> 자동화하고 싶은 일이 이미 있어요<br><b>2.</b> 아직 구체적이진 않아요 — 제 업무를 설명하면서 찾아보고 싶어요</p>
+        <p class="t-line t-user" style="animation-delay:1.8s">2</p>
+        <p class="t-line t-claude" style="animation-delay:2.5s">가장 최근에 일하신 날을 떠올려 볼게요. 일을 시작해서 마칠 때까지 한 일을 순서대로 편하게 말해주세요.</p>
+        <p class="t-line t-user" style="animation-delay:3.4s">메일 보고, 은행 좀 보고, 영수증 정리하고…</p>
+        <p class="t-line t-claude" style="animation-delay:4.2s"><b>"은행 좀 본다"</b>고 하셨는데요, 구체적으로 뭘 확인하세요?<span class="t-cursor"></span></p>
+        <p class="t-line t-dim" style="animation-delay:5s">— 가상 참가자와의 실제 대화에서 발췌</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 01 한눈에 ═══ -->
+<section id="overview">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">01</span>
+      <h2>세 단계면 끝나요</h2>
+      <p>명령어는 외울 필요 없어요. <code>/start</code> 하나만 치면 나머지는 Claude 가 안내합니다.</p>
+    </div>
+    <div class="flow3">
+      <div class="card reveal">
+        <span class="cmd">/start</span>
+        <h3>찾기</h3>
+        <p>Claude 가 내 하루를 같이 되짚으며 반복 업무를 찾고, 각각 얼마나 자동화될 수 있는지 A~D 로 알려줘요.</p>
+        <div class="out">손에 남는 것 · <b>내 업무 자동화 후보 목록</b></div>
+      </div>
+      <div class="card reveal">
+        <span class="cmd">/build</span>
+        <h3>만들기</h3>
+        <p>바로 될 만한 일이 있으면 그 자리에서 자동화를 만들고, 내 샘플 파일로 실제로 돌려봐요.</p>
+        <div class="out">손에 남는 것 · <b>다음 주에도 쓰는 내 자동화</b></div>
+      </div>
+      <div class="card reveal">
+        <span class="cmd">/report</span>
+        <h3>보내기</h3>
+        <p>회사·사람·금액 정보를 지운 리포트를 만들고, 내가 확인한 뒤 진행자에게 메일로 보내요.</p>
+        <div class="out">손에 남는 것 · <b>1:1 상담 신청서</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 준비물 ═══ -->
+<section id="ready">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">02</span>
+      <h2>시작 전에 확인해요</h2>
+      <p>네 가지만 있으면 돼요. 마지막 하나는 없어도 괜찮아요.</p>
+    </div>
+    <div class="checks">
+      <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>Claude 유료 플랜</b><span>Pro 이상. 무료 플랜에서는 Claude Code 를 쓸 수 없어요.</span></div></div>
+      <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>Claude Code</b><span>터미널용이든 Claude 데스크톱 앱이든 괜찮아요. 없으면 <a href="install.html">설치 가이드</a>부터.</span></div></div>
+      <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>30~60분</b><span>중간에 끊겨도 다시 이어서 할 수 있어요.</span></div></div>
+      <div class="card check optional reveal"><span class="box"></span><div><b>업무 파일 샘플 (선택)</b><span>평소 쓰는 엑셀·문서·화면 캡처. 민감한 부분은 지운 사본이면 충분해요. 없어도 대화로 진행돼요.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 시작하기 ═══ -->
+<section id="start">
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">03</span>
+      <h2>시작하기</h2>
+      <p>내 컴퓨터에 맞는 탭을 골라 순서대로 따라 하세요.</p>
+    </div>
+
+    <div data-tabs data-os-default>
+      <div class="tabs" role="tablist" aria-label="운영체제">
+        <button class="tab" role="tab" id="t-win" data-os="win" aria-controls="p-win" aria-selected="true">Windows</button>
+        <button class="tab" role="tab" id="t-mac" data-os="mac" aria-controls="p-mac" aria-selected="false" tabindex="-1">Mac</button>
+      </div>
+
+      <div class="tabpanel" id="p-win" role="tabpanel" aria-labelledby="t-win">
+        <ol class="steps">
+          <li class="reveal">
+            <h3>키트 받기</h3>
+            <p><a href="https://github.com/hi8735/ai-automation-kit/releases/latest/download/ai-automation-kit.zip">키트 다운로드</a>를 눌러 <code>ai-automation-kit.zip</code> 을 받아요. 보통 <b>다운로드</b> 폴더에 저장돼요.</p>
+          </li>
+          <li class="reveal">
+            <h3>압축 풀기</h3>
+            <p>zip 파일을 <b>오른쪽 클릭 → 모두 압축 풀기</b>. 풀 위치는 찾기 쉬운 곳으로 바꿔주세요. 추천: <code>C:\ai-work</code></p>
+            <div class="note"><span class="ni">!</span><span><b>폴더가 두 겹으로 풀릴 수 있어요.</b> 그럴 땐 안쪽 폴더가 진짜예요. <code>CLAUDE.md</code> 파일과 <code>inputs</code> 폴더가 <b>바로 보이는 폴더</b>를 찾으세요.</span></div>
+            <div class="folder-diagram" aria-label="두 겹 폴더 예시">
+              C:\ai-work\ai-automation-kit\ <span class="tag no">여기 아님</span><br>
+              &nbsp;&nbsp;└ <span class="good">ai-automation-kit\</span> <span class="tag ok">여기서 실행</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├ CLAUDE.md<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├ inputs\ · results\ · report\ …
+            </div>
+            <div class="note info"><span class="ni">i</span><span>바탕화면이나 OneDrive 폴더는 피하는 게 좋아요. 동기화 때문에 가끔 문제가 생겨요.</span></div>
+          </li>
+          <li class="reveal">
+            <h3>그 폴더에서 Claude Code 열기</h3>
+            <p><b>터미널로 쓰는 경우:</b> 키트 폴더를 연 상태에서 위쪽 <b>주소창</b>을 클릭하고 <code>cmd</code> 를 입력한 뒤 Enter. 검은 창이 뜨면 아래를 입력하고 Enter.</p>
+            <div class="cmdbox"><code>claude</code><button class="copy" type="button">복사</button></div>
+            <p><b>데스크톱 앱으로 쓰는 경우:</b> Claude 앱 → <b>Code</b> → 작업 폴더로 키트 폴더를 선택.</p>
+          </li>
+          <li class="reveal">
+            <h3>"이 폴더를 신뢰하시겠습니까?" → 예</h3>
+            <p>처음 한 번 물어봐요. <b>예(Yes)</b> 를 골라야 키트가 제대로 동작해요.</p>
+          </li>
+          <li class="reveal">
+            <h3><code>/start</code> 입력</h3>
+            <div class="cmdbox"><code>/start</code><button class="copy" type="button">복사</button></div>
+            <p>그냥 "안녕하세요" 라고 쳐도 시작돼요. 이제부터는 Claude 가 하나씩 물어봅니다.</p>
+          </li>
+        </ol>
+      </div>
+
+      <div class="tabpanel" id="p-mac" role="tabpanel" aria-labelledby="t-mac" hidden>
+        <ol class="steps">
+          <li>
+            <h3>키트 받기</h3>
+            <p><a href="https://github.com/hi8735/ai-automation-kit/releases/latest/download/ai-automation-kit.zip">키트 다운로드</a>를 눌러 zip 을 받아요. <b>다운로드</b> 폴더에 저장돼요.</p>
+          </li>
+          <li>
+            <h3>압축 풀고 옮기기</h3>
+            <p>zip 을 더블클릭하면 <code>ai-automation-kit</code> 폴더가 생겨요. 찾기 쉬운 곳(예: <b>문서</b>)으로 옮겨주세요.</p>
+          </li>
+          <li>
+            <h3>그 폴더에서 Claude Code 열기</h3>
+            <p><b>터미널로 쓰는 경우:</b> Finder 에서 키트 폴더를 <b>오른쪽 클릭 → 서비스 → 폴더에서 새로운 터미널 열기</b>. 열린 창에 입력하고 Enter.</p>
+            <div class="cmdbox"><code>claude</code><button class="copy" type="button">복사</button></div>
+            <div class="note info"><span class="ni">i</span><span>메뉴가 안 보이면: 터미널을 열고 <code>cd</code> 와 한 칸 띄어쓰기를 친 뒤, 키트 폴더를 터미널 창으로 끌어다 놓고 Enter. 그다음 <code>claude</code>.</span></div>
+            <p><b>데스크톱 앱으로 쓰는 경우:</b> Claude 앱 → <b>Code</b> → 작업 폴더로 키트 폴더를 선택.</p>
+          </li>
+          <li>
+            <h3>"이 폴더를 신뢰하시겠습니까?" → 예</h3>
+            <p>처음 한 번 물어봐요. <b>예(Yes)</b> 를 골라야 키트가 제대로 동작해요.</p>
+          </li>
+          <li>
+            <h3><code>/start</code> 입력</h3>
+            <div class="cmdbox"><code>/start</code><button class="copy" type="button">복사</button></div>
+            <p>그냥 "안녕하세요" 라고 쳐도 시작돼요.</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="note info reveal" style="margin-top:4px"><span class="ni">i</span><span>진행하다 보면 Claude 가 파일을 만들거나 프로그램을 실행할 때 <b>허락을 묻는 창</b>이 떠요. Claude 가 바로 앞에서 무엇을 하려는지 설명하니, 괜찮으면 <b>예</b>를 눌러주세요.</span></div>
+  </div>
+</section>
+
+<!-- ═══ 04 안에서 일어나는 일 ═══ -->
+<section id="inside">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">04</span>
+      <h2>Claude Code 안에서는 무슨 일이?</h2>
+      <p>대화에 집중하다 보면 지금 어디쯤인지 헷갈릴 수 있어요. 이 지도를 옆에 띄워두면 각 단계에서 Claude 가 무엇을 하고, 내가 무엇을 하면 되고, 폴더에 무엇이 생기는지 한눈에 보여요.</p>
+    </div>
+
+    <div class="journey reveal" data-tabs>
+      <ul class="jlist" role="tablist" aria-label="진행 단계" aria-orientation="vertical">
+        <li><button class="jbtn" role="tab" id="j0" aria-controls="jp0" aria-selected="true"><span class="jn">0</span><span><b>인사와 닉네임</b><small>1분</small></span></button></li>
+        <li><button class="jbtn" role="tab" id="j1" aria-controls="jp1" aria-selected="false" tabindex="-1"><span class="jn">1</span><span><b>갈래 고르기</b><small>1분</small></span></button></li>
+        <li><button class="jbtn" role="tab" id="j2" aria-controls="jp2" aria-selected="false" tabindex="-1"><span class="jn">2</span><span><b>업무 찾기</b><small>10~20분</small></span></button></li>
+        <li><button class="jbtn" role="tab" id="j3" aria-controls="jp3" aria-selected="false" tabindex="-1"><span class="jn">3</span><span><b>후보 고르기</b><small>3~5분</small></span></button></li>
+        <li><button class="jbtn" role="tab" id="j4" aria-controls="jp4" aria-selected="false" tabindex="-1"><span class="jn">4</span><span><b>깊이 파기와 진단</b><small>10~15분</small></span></button></li>
+        <li><button class="jbtn" role="tab" id="j5" aria-controls="jp5" aria-selected="false" tabindex="-1"><span class="jn">5</span><span><b>만들기</b> <small>20~40분 · 선택</small></span></button></li>
+        <li><button class="jbtn" role="tab" id="j6" aria-controls="jp6" aria-selected="false" tabindex="-1"><span class="jn">6</span><span><b>리포트</b><small>5분</small></span></button></li>
+      </ul>
+
+      <div>
+        <div class="card jpanel" role="tabpanel" id="jp0" aria-labelledby="j0">
+          <h3>인사와 닉네임</h3>
+          <p class="jsub"><code>/start</code> 를 치면 바로 시작돼요</p>
+          <div class="jgrid">
+            <div class="jcell"><h4>Claude 가 하는 일</h4><ul><li>키트를 짧게 소개하고 진행 시간을 알려줘요</li><li>내 컴퓨터 환경(Windows/Mac, 엑셀 처리 도구 유무)을 조용히 확인해요</li><li>지난번 기록이 있으면 이어서 할지 물어요</li></ul></div>
+            <div class="jcell"><h4>내가 할 일</h4><ul><li><b>당근 모임 닉네임</b>을 알려주기 — 진행자가 이 이름으로 1:1 연락을 드려요</li></ul></div>
+            <div class="jcell wide"><h4>Claude 가 이렇게 말해요</h4><p class="jquote">"넣어주신 파일과 여기 적어주신 내용은 Claude 로 전송돼요. 회사에 다니시면 회사 규정을 한번 확인해 주시고, 가능하면 민감한 부분을 지운 샘플을 써주세요."</p></div>
+          </div>
+        </div>
+
+        <div class="card jpanel" role="tabpanel" id="jp1" aria-labelledby="j1" hidden>
+          <h3>갈래 고르기</h3>
+          <p class="jsub">두 갈래 중 하나를 번호로 골라요. 애매하면 2번이 좋아요.</p>
+          <div class="jgrid">
+            <div class="jcell"><h4>1번 · 하고 싶은 일이 있어요</h4><ul><li>그 일을 한두 문장으로 설명</li><li>"자동화되면 나는 무엇만 하면 되나" — 완성된 모습을 같이 그려요</li><li>더 좋은 후보가 있는지 2~3분 짧게 훑어봐요</li></ul></div>
+            <div class="jcell"><h4>2번 · 아직 잘 모르겠어요</h4><ul><li>"무엇을 자동화하고 싶으세요?" 라고 묻지 않아요</li><li>대신 <b>최근 하루</b>를 같이 되짚으며 Claude 가 반복 업무를 찾아내요</li><li>익숙해서 안 보이던 일이 여기서 나와요</li></ul></div>
+          </div>
+        </div>
+
+        <div class="card jpanel" role="tabpanel" id="jp2" aria-labelledby="j2" hidden>
+          <h3>업무 찾기</h3>
+          <p class="jsub">이 키트에서 가장 중요한 단계예요. 서두르지 않아요.</p>
+          <div class="jgrid">
+            <div class="jcell"><h4>Claude 가 하는 일</h4><ul><li>하루 흐름을 듣다가 "옮겨 적기", "여러 파일 합치기", "매번 같은 답장" 같은 <b>자동화 신호</b>를 잡아 되물어요</li><li>후보마다 빈도·시간을 물어 <b>한 달에 몇 시간</b> 드는지 계산해요</li><li>몇 번 답할 때마다 "제가 이해한 게 맞나요?" 로 정리해요</li></ul></div>
+            <div class="jcell"><h4>내가 할 일</h4><ul><li>사소한 일도 편하게 말하기 — 사소한 일에서 줄일 게 많이 나와요</li><li>"귀찮다", "실수한다" 같은 느낌도 솔직하게</li></ul></div>
+            <div class="jcell wide"><h4>폴더에 생기는 것</h4><p><span class="file-chip">results/interview.md</span> — 대화 내용이 단계마다 저장돼요. 끊겨도 여기서 이어져요. <b>내 PC 에만 두는 파일</b>이에요.</p></div>
+          </div>
+        </div>
+
+        <div class="card jpanel" role="tabpanel" id="jp3" aria-labelledby="j3" hidden>
+          <h3>후보 고르기</h3>
+          <p class="jsub">후보마다 자동화 가능성을 A~D 로 알려줘요</p>
+          <div class="jgrid">
+            <div class="jcell wide"><h4>등급의 뜻</h4><ul>
+              <li><span class="grade a">A</span> 지금 이 폴더에서 바로 가능 — 파일·엑셀·문서·글 작업</li>
+              <li><span class="grade b">B</span> 연결 설정이 필요 — 메일함, 구글 드라이브, 노션 등</li>
+              <li><span class="grade c">C</span> 사내 시스템·웹사이트를 직접 눌러야 함 — 가능하지만 잘 깨져요</li>
+              <li><span class="grade d">D</span> 맞지 않음 — 사람의 판단·책임이 핵심이거나 보안상 어려움</li>
+            </ul></div>
+            <div class="jcell"><h4>Claude 가 하는 일</h4><p><b>효과가 가장 큰 일</b>과 <b>오늘 바로 성공할 일</b>을 따로 보여줘요. 처음엔 성공할 일로 시작하는 걸 추천해요.</p></div>
+            <div class="jcell"><h4>내가 할 일</h4><p>어느 걸로 할지 고르기. 결정은 내가 해요.</p></div>
+          </div>
+        </div>
+
+        <div class="card jpanel" role="tabpanel" id="jp4" aria-labelledby="j4" hidden>
+          <h3>깊이 파기와 진단</h3>
+          <p class="jsub">말로 하는 설명과 실제 작업은 거의 항상 달라요. 그래서 실제를 따라가요.</p>
+          <div class="jgrid">
+            <div class="jcell"><h4>Claude 가 하는 일</h4><ul><li>"지난번에 그 일 할 때 맨 처음 뭘 열었어요?" 부터 한 단계씩</li><li>규칙대로 되는 부분과 내가 판단하는 부분을 나눠요</li><li>등급, 추천 방식, 예상 절감 시간, 한계를 정리해요</li></ul></div>
+            <div class="jcell"><h4>내가 할 일</h4><ul><li>가능하면 샘플 파일이나 화면 캡처를 <span class="file-chip">inputs</span> 폴더에 넣고 파일 이름 알려주기</li><li>한글(.hwp)·워드는 PDF 로 저장해서</li></ul></div>
+            <div class="jcell wide"><h4>안 되는 건 안 된다고 말해요</h4><p class="jquote">"다음 날 멈출 걸 '된다'고 말씀드릴 수는 없어서 미리 말씀드려요. 대신 손이 가는 부분을 확 줄일 방법은 있을 수 있어요."</p></div>
+          </div>
+        </div>
+
+        <div class="card jpanel" role="tabpanel" id="jp5" aria-labelledby="j5" hidden>
+          <h3>만들기 <span style="font-size:15px;color:var(--ink-3);font-family:var(--sans)">— A 등급이고 샘플이 있을 때</span></h3>
+          <p class="jsub">"지금 바로 만들어볼까요?" 라고 물어요. 싫으면 건너뛰어도 돼요.</p>
+          <div class="jgrid">
+            <div class="jcell"><h4>Claude 가 하는 일</h4><ul><li>인터뷰에서 들은 내 업무 방식 그대로 <b>자동화 문서</b>를 써요</li><li>엑셀이 필요하면 작은 프로그램도 만들어요 (허락 창이 떠요)</li><li>내 샘플로 <b>실제로 돌려보고</b> 결과를 보여줘요</li></ul></div>
+            <div class="jcell"><h4>내가 할 일</h4><ul><li>결과가 평소 내가 만들던 것과 같은지 확인</li><li>다른 점을 말하면 고쳐서 다시 돌려요</li></ul></div>
+            <div class="jcell wide"><h4>폴더에 생기는 것</h4><p><span class="file-chip">automations/이름/</span> 자동화 문서와 사용법 · <span class="file-chip">outputs/</span> 결과물 (실행할 때마다 새 파일)<br>다음부터는 파일을 <span class="file-chip">inputs</span> 에 넣고 <code>/run 이름</code> 만 치면 돼요.</p></div>
+          </div>
+        </div>
+
+        <div class="card jpanel" role="tabpanel" id="jp6" aria-labelledby="j6" hidden>
+          <h3>리포트</h3>
+          <p class="jsub"><code>/report</code> — 중간까지만 했어도 만들 수 있어요</p>
+          <div class="jgrid">
+            <div class="jcell"><h4>Claude 가 하는 일</h4><ul><li>당근 닉네임을 한 번 더 확인</li><li>회사·사람·고객 이름, 연락처, 금액을 지운 초안을 써요</li><li>남은 게 없는지 스스로 점검한 뒤 <b>전문을 보여줘요</b></li></ul></div>
+            <div class="jcell"><h4>내가 할 일</h4><ul><li>읽어보고 빼고 싶은 게 있으면 말하기</li><li>괜찮으면 "보내도 돼요"</li><li>안내대로 메일 보내기</li></ul></div>
+            <div class="jcell wide"><h4>폴더에 생기는 것</h4><p><span class="file-chip">report/submit-닉네임.md</span> — <b>이 파일만</b> 보내요. <span class="file-chip">results</span> 는 보내지 않아요.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 05 명령 사전 ═══ -->
+<section id="commands">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">05</span>
+      <h2>명령 사전</h2>
+      <p>키트에는 명령이 네 개 있어요. 보통은 <code>/start</code> 만 치면 나머지로 자연스럽게 이어져요.</p>
+    </div>
+    <div class="cmds">
+      <div class="card cmdcard reveal">
+        <span class="name">/start</span><span class="role">인터뷰</span>
+        <p>내 업무를 같이 되짚으며 자동화할 일을 찾고 진단해요. 이미 했던 사람은 멈춘 곳부터 이어가요.</p>
+        <dl><dt>언제</dt><dd>처음 시작할 때, 이어서 할 때</dd><dt>만드는 것</dt><dd><span class="file-chip">results/interview.md</span></dd><dt>시간</dt><dd>30~60분</dd></dl>
+      </div>
+      <div class="card cmdcard reveal">
+        <span class="name">/build</span><span class="role">자동화 만들기</span>
+        <p>고른 업무로 자동화를 만들고 내 샘플로 시험해요. 인터뷰 끝에 "만들어볼까요?" 에 예라고 하면 자동으로 이어져요.</p>
+        <dl><dt>언제</dt><dd>A 등급 업무가 있고 샘플이 있을 때</dd><dt>만드는 것</dt><dd><span class="file-chip">automations/이름/</span> <span class="file-chip">outputs/</span></dd><dt>시간</dt><dd>20~40분</dd></dl>
+      </div>
+      <div class="card cmdcard reveal">
+        <span class="name">/run 이름</span><span class="role">다시 실행</span>
+        <p>만든 자동화를 다음 주에 또 쓸 때. 새 파일을 <span class="file-chip">inputs</span> 에 넣고 치면, Claude 가 자동화 문서대로 처리해요.</p>
+        <dl><dt>예</dt><dd><code>/run weekly-report</code></dd><dt>만드는 것</dt><dd><span class="file-chip">outputs/</span> 에 새 결과 (이전 결과는 그대로)</dd><dt>시간</dt><dd>몇 분</dd></dl>
+      </div>
+      <div class="card cmdcard reveal">
+        <span class="name">/report</span><span class="role">제출용 리포트</span>
+        <p>회사 정보를 지운 리포트를 만들어요. 보여주고, 확인받고, 그다음에만 저장해요.</p>
+        <dl><dt>언제</dt><dd>인터뷰를 마쳤을 때 (중간까지만 해도 OK)</dd><dt>만드는 것</dt><dd><span class="file-chip">report/submit-닉네임.md</span></dd><dt>시간</dt><dd>5분</dd></dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 06 폴더 지도 ═══ -->
+<section id="folders">
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">06</span>
+      <h2>폴더 지도</h2>
+      <p>키트 폴더 안의 폴더가 각각 무슨 일을 하는지, 무엇을 보내도 되는지예요.</p>
+    </div>
+    <div class="folders">
+      <div class="card frow reveal"><span class="fname"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>inputs</span><p>내가 넣는 곳. 업무 파일 샘플, 화면 캡처.</p><span class="badge mid">내가 넣어요</span></div>
+      <div class="card frow reveal"><span class="fname"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>results</span><p>인터뷰 기록. 실제 업무 내용이 그대로 들어가요.</p><span class="badge no">보내지 마세요</span></div>
+      <div class="card frow reveal"><span class="fname"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>report</span><p>제출용 리포트. 회사 정보를 지운 버전.</p><span class="badge ok">이것만 보내요</span></div>
+      <div class="card frow reveal"><span class="fname"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>automations</span><p>내가 만든 자동화. 어떻게 처리하는지 적은 문서라 직접 열어서 고쳐도 돼요.</p><span class="badge mid">내 자동화</span></div>
+      <div class="card frow reveal"><span class="fname"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>outputs</span><p>자동화가 만든 결과물. 실행할 때마다 날짜·시각이 붙은 새 파일.</p><span class="badge mid">결과물</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 07 예시 ═══ -->
+<section id="example">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">07</span>
+      <h2>실제로는 이렇게 흘러가요</h2>
+      <p>"그냥 이것저것 해요" 로 시작한 경리·총무 담당자가, 매주 90분씩 들던 일을 찾아내고 자동화까지 만든 과정이에요.</p>
+    </div>
+    <p class="disclaimer reveal"><b>가상 인물 예시예요.</b> 키트를 시험하려고 만든 가상 참가자 "봄날" 과의 대화이고, Claude 의 질문과 결과물은 실제 출력을 줄여서 옮겼어요. 회사·사람 이름은 가상입니다.</p>
+
+    <div class="example">
+      <div class="card chat reveal" aria-label="대화 발췌">
+        <div><div class="who">Claude</div><div class="bubble c">가장 최근에 일하신 날을 하나 떠올려 주세요. 출근해서 퇴근할 때까지 하신 일을 순서대로 편하게 말씀해 주시면 돼요. <b>사소한 일도 좋아요. 오히려 사소한 일에서 줄일 수 있는 게 많이 나와요.</b></div></div>
+        <div class="bubble u">어제는... 메일이랑 카톡 확인하고, 은행 좀 보고, 영수증 정리하고, 오후엔 부장님이 시킨 거 하고 택배 보내고 그랬어요</div>
+        <div><div class="who">Claude</div><div class="bubble c">아침에 <b>"은행 좀 본다"</b>고 하셨는데요, 인터넷뱅킹에 들어가서 구체적으로 뭘 확인하세요?</div></div>
+        <div class="bubble u">평일엔 그냥 잔액 정도 보는데, 월요일엔 좀 많아요. 거래내역을 엑셀로 내려받아서 거래처별로 입금됐는지 보고 미수금 엑셀에 옮겨 적어요</div>
+        <div><div class="who">Claude</div><div class="bubble c">월요일 일이 눈에 띄네요. 그 일을 하시면 보통 얼마나 걸리세요?</div></div>
+        <div class="bubble u">한 시간 반? 거래처가 30군데라서요. 입금자명이 회사 이름이랑 다르게 찍히는 경우도 있어서 짜증나요</div>
+        <div><div class="who">Claude</div><div class="bubble c">매주 한 시간 반이면 <b>한 달에 6시간</b> 정도예요. 그 부분이 궁금해요. 입금자명이 다르게 찍혔을 때, 어느 거래처 돈인지 보통 어떻게 알아내세요?</div></div>
+        <div class="bubble u">대부분 금액 보고 알아요. 어떤 데는 대표 이름으로 들어와요. 그런 건 제가 메모해둔 게 있어요</div>
+        <div><div class="who">Claude</div><div class="bubble c">그 메모가 정말 중요해요. "이 이름으로 들어오면 이 거래처" 라는 짝이 이미 정리돼 있으면, <b>그걸 그대로 규칙으로 쓸 수 있거든요.</b> 이 일은 첫 번째 후보로 적어둘게요.</div></div>
+        <span class="gap">영수증 입력, 월말 자금 보고도 같은 방식으로 찾아냄</span>
+        <div><div class="who">Claude</div><div class="bubble c">대부분은 규칙대로 나뉘고, 애매한 것만 직원분께 물어보시는 거네요. AI 가 먼저 채워두고 애매한 것만 표시해 두면, <b>봄날님은 그것만 확인하시면 돼요.</b></div></div>
+      </div>
+
+      <div class="side">
+        <div class="card mini reveal">
+          <h4>찾아낸 업무</h4>
+          <table>
+            <thead><tr><th>업무</th><th>빈도 · 시간</th><th>월</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>월요일 입금 확인 → 미수금 엑셀</td><td class="num">주 1회 · 90분</td><td class="num">6h</td><td><span class="grade a">A</span></td></tr>
+              <tr><td>영수증 사진 → 경비 엑셀 입력</td><td class="num">매일 · 20분</td><td class="num">7h</td><td><span class="grade a">A</span></td></tr>
+              <tr><td>월말 자금 보고</td><td class="num">월 1회 · 2시간</td><td class="num">2h</td><td><span class="grade a">A</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card mini reveal">
+          <h4>만든 자동화가 내놓은 결과 — <code>/run deposit-check</code></h4>
+<div class="output">입금 5건 미수금에 반영 · 확인 필요 1건 · 예정일 지난 곳 1곳
+
+<span class="hl">부장님께 보낼 카톡 (초안)</span>
+부장님, 10/24 기준 입금 확인 결과입니다.
+이번에 들어온 입금 5건 미수금에 반영했습니다.
+
+예정일이 지났는데 아직 안 들어온 곳입니다.
+- 미래상사 5,000,000원 (예정일 10/10, 14일 지남)
+
+누가 보낸 건지 모르는 입금이 있는데 혹시 아시는지요?
+- 10/23 이영희 1,000,000원</div>
+        </div>
+        <div class="card mini rep reveal">
+          <h4>진행자에게 간 리포트 (요약)</h4>
+          <dl>
+            <dt>직무</dt><dd>소규모 무역업 · 경리·총무 3년차</dd>
+            <dt>선택한 일</dt><dd>주간 입금 확인 <span class="grade a">A</span> · 월 6시간 → 약 2시간</dd>
+            <dt>만든 것</dt><dd>성공 — <code>/run deposit-check</code></dd>
+            <dt>회사 정보</dt><dd>회사·부장님·거래처 이름, 금액 모두 제거</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="more">
+      <div class="card reveal">
+        <span class="who-line">동네 베이커리 카페 사장 · 가상 인물</span>
+        <h3>사무직이 아니어도 돼요</h3>
+        <div class="pair">
+          <div class="in"><span class="lbl">손님 리뷰 ★2</span>배달 늦게 오고 케이크 옆면이 좀 뭉개졌어요. 010-○○○○-○○○○로 연락주세요</div>
+          <div class="outp"><span class="lbl">자동화가 쓴 답글 초안</span>불편을 드려 정말 죄송해요. 케이크가 뭉개져서 도착해 많이 속상하셨을 것 같아요. 다음에 오시면 음료 서비스 드릴게요. 남겨주신 연락처로 따로 연락드릴게요.<br>— ○○빵집 드림</div>
+        </div>
+        <p style="margin:12px 0 0;font-size:14.5px;color:var(--ink-2)">사장님 말투("이모티콘은 ㅎㅎ 한 번까지", "불만 리뷰는 사과부터")를 인터뷰에서 듣고 그대로 규칙으로 넣었어요. 전화번호는 답글에 넣지 않고 "따로 연락할 손님" 목록으로 빼줘요. 프로그램 설치 없이 동작해요.</p>
+      </div>
+      <div class="card reveal">
+        <span class="who-line">재단 인사·총무 담당 · 가상 인물</span>
+        <h3>안 되는 건 솔직하게 말해요</h3>
+        <div class="pair">
+          <div class="in"><span class="lbl">참가자</span>그룹웨어에 휴가 신청 들어오면 자동으로 결재 올리고 근태 시스템에 입력되게 하고 싶어요</div>
+          <div class="outp" style="background:var(--accent-soft);color:#5b2a0b"><span class="lbl">Claude</span>"아무것도 안 해도 알아서 되는" 모습은 지금 이 키트로 약속드리기 어려워요. 화면이 조금만 바뀌어도 멈추기 쉽고, 공공기관은 보안 규정으로 막혀 있는 경우도 많아요. 대신 손이 가는 부분을 확 줄일 방법은 있을 수 있어요.</div>
+        </div>
+        <p style="margin:12px 0 0;font-size:14.5px;color:var(--ink-2)">이 일은 <span class="grade c">C</span> 로 정직하게 판정하고, 같은 사람의 다른 업무(매달 공문 초안 작성, <span class="grade a">A</span>)로 방향을 돌려 그날 자동화를 완성했어요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 08 정보 보호 ═══ -->
+<section id="privacy">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">08</span>
+      <h2>회사 정보는 이렇게 지켜져요</h2>
+      <p>인터뷰 기록은 내 PC 에만 남고, 진행자에게는 정보를 지운 리포트만 가요. 리포트는 내가 전문을 읽고 "보내도 돼요" 라고 해야만 만들어져요.</p>
+    </div>
+    <div class="privacy">
+      <div class="card reveal">
+        <h4>인터뷰 기록</h4>
+        <div class="where"><span class="file-chip">results/interview.md</span> · 내 PC 에만</div>
+        <ul>
+          <li>고객 <mark>서울○○내과</mark>, <mark>강남○○안과</mark></li>
+          <li>담당자 <mark>이○○ 실장 010-○○○○-○○○○</mark></li>
+          <li>건당 <mark>4,750만원</mark></li>
+          <li>사내 CRM <mark>MediCRM</mark></li>
+        </ul>
+      </div>
+      <div class="arrow-mid" aria-hidden="true">→</div>
+      <div class="card clean reveal">
+        <h4>진행자에게 가는 리포트</h4>
+        <div class="where"><span class="file-chip">report/submit-닉네임.md</span></div>
+        <ul>
+          <li><mark>큰 고객 건</mark></li>
+          <li>(연락처 삭제)</li>
+          <li><mark>건당 수천만 원 규모</mark></li>
+          <li><mark>사내 고객관리 시스템</mark></li>
+        </ul>
+      </div>
+    </div>
+    <div class="note info reveal" style="margin-top:20px"><span class="ni">i</span><span>엑셀, 슬랙, 배민처럼 <b>누구나 쓰는 서비스 이름</b>은 남겨요. 회사를 알아낼 수 없고, 진행자가 자동화 방법을 고르는 데 필요하거든요. 대화 중 넣은 파일과 내용은 Claude 로 전송되니, 가능하면 <b>민감한 부분을 가짜 값으로 바꾼 샘플</b>을 써주세요. 공공기관·금융·의료 쪽이라면 회사의 AI 사용 지침을 먼저 확인해 주세요.</span></div>
+  </div>
+</section>
+
+<!-- ═══ 09 보내기 ═══ -->
+<section id="send">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">09</span>
+      <h2>리포트 보내기</h2>
+      <p><code>/report</code> 가 끝나면 Claude 가 보낼 곳과 제목까지 채워서 알려줘요. 미리 보내주신 분들 중에서 1:1 로 더 깊게 봐드릴 분을 골라요.</p>
+    </div>
+    <div class="send">
+      <div class="card reveal">
+        <div class="mail">
+          <b>받는 사람</b> woo.noh@healingpaper.com<br>
+          <b>제목</b> [AI자동화] 당근닉네임 - 직무<br>
+          <b>첨부</b> report/submit-닉네임.md
+        </div>
+        <div class="cmdbox" style="margin-top:12px"><code>woo.noh@healingpaper.com</code><button class="copy" type="button">복사</button></div>
+      </div>
+      <div class="card reveal">
+        <ul style="margin:0;padding-left:20px;color:var(--ink-2)">
+          <li style="margin-bottom:8px">진행자는 <b>당근 모임 닉네임</b>으로 연락드려요. 리포트에 닉네임이 정확한지 확인해 주세요.</li>
+          <li style="margin-bottom:8px">첨부가 어려우면 Claude 에게 말하세요. 메일 본문에 붙여넣을 수 있게 내용을 보여줘요.</li>
+          <li style="margin-bottom:8px"><code>results</code> 폴더는 보내지 마세요.</li>
+          <li>보내주신 리포트는 1:1 대상 선정에 쓰고, 모임에서 닉네임 없이 묶어서 사례로 소개할 수 있어요.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 FAQ ═══ -->
+<section id="faq">
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">10</span>
+      <h2>막혔을 때</h2>
+      <p>여기 없는 문제는 어디서 어떻게 막혔는지(화면 캡처면 더 좋아요) 모임 채팅방에 남겨주세요.</p>
+    </div>
+    <div class="faq">
+      <details><summary>Claude Code 가 아직 없어요</summary><div class="ans"><p><a href="install.html">설치 가이드</a>를 따라 하시면 돼요. Claude 유료 플랜(Pro 이상)이 필요해요.</p></div></details>
+      <details><summary><code>/start</code> 를 쳤는데 반응이 이상해요</summary><div class="ans"><p>키트 폴더가 아닌 곳에서 실행했을 가능성이 커요. <code>CLAUDE.md</code> 파일과 <code>inputs</code> 폴더가 바로 보이는 폴더에서 다시 열어주세요. 압축을 풀었더니 폴더가 두 겹이 된 경우가 가장 흔해요.</p></div></details>
+      <details><summary>중간에 창을 닫았어요 / 멈췄어요</summary><div class="ans"><p>같은 폴더에서 Claude Code 를 다시 열고 <code>/start</code>. 대화 내용이 단계마다 저장되어 있어서 멈춘 곳부터 이어져요.</p></div></details>
+      <details><summary>"사용량 한도" 메시지가 나와요</summary><div class="ans"><p>플랜의 사용량을 다 쓴 거예요. 표시된 시간이 지난 뒤 다시 열고 <code>/start</code> 하면 이어집니다.</p></div></details>
+      <details><summary>허락을 묻는 창이 자꾸 떠요</summary><div class="ans"><p>Claude 가 파일을 만들거나 프로그램을 실행할 때 확인을 받는 거예요. Claude 가 바로 앞에서 무엇을 하려는지 설명하니, 괜찮으면 <b>예</b>를 눌러주세요. 처음에 "이 폴더를 신뢰하시겠습니까?" 에 예를 눌러야 확인 창이 줄어들어요.</p></div></details>
+      <details><summary>엑셀·한글 파일을 못 읽는대요</summary><div class="ans"><p><b>한글(.hwp)·워드</b>는 "다른 이름으로 저장 → PDF" 로 저장해서 넣어주세요. <b>엑셀</b>은 Claude 가 엑셀 처리 도구(Python) 설치를 도와드려요. 회사 PC 라 설치가 막히면 "다른 이름으로 저장 → CSV UTF-8" 로 저장해서 넣으면 돼요. <b>아이폰 사진(.heic)</b>은 화면에 띄워 스크린샷을 찍어 넣어주세요.</p></div></details>
+      <details><summary>회사 파일을 넣어도 괜찮을까요?</summary><div class="ans"><p>넣은 파일과 대화 내용은 Claude 로 전송돼요. 회사 규정을 먼저 확인해 주시고, 가능하면 이름·연락처·금액을 가짜 값으로 바꾼 사본을 써주세요. 그래도 충분히 진행돼요. 파일 없이 말로만 해도 괜찮아요.</p></div></details>
+      <details><summary>키트 새 버전이 나왔대요</summary><div class="ans"><p>새 zip 을 <b>원래 키트 폴더와 같은 위치에</b> 풀고, "파일을 바꾸시겠습니까?" 가 나오면 예. 인터뷰 기록과 만든 자동화는 그대로 남아요. 다운로드 링크는 항상 최신 버전을 받아요.</p></div></details>
+      <details><summary>만든 자동화는 다음에 어떻게 써요?</summary><div class="ans"><p>새 파일을 <code>inputs</code> 에 넣고, 키트 폴더에서 Claude Code 를 연 다음 <code>/run 이름</code>. 이름이 기억 안 나면 <code>/run</code> 만 쳐도 목록을 보여줘요.</p></div></details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>AI 업무자동화 키트 · 당근 AI 모임 실험용으로 만들었어요</span>
+    <span><a href="https://github.com/hi8735/ai-automation-kit">GitHub</a> · <a href="install.html">Claude Code 설치</a> · <a href="https://github.com/hi8735/ai-automation-kit/releases/latest/download/ai-automation-kit.zip">키트 다운로드</a></span>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
