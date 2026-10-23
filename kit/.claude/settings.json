@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(python --version)",
+      "Bash(python3 --version)",
+      "Bash(py --version)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(where:*)",
+      "Bash(which:*)"
+    ],
+    "ask": [
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(py:*)",
+      "Bash(winget:*)",
+      "Bash(pip:*)",
+      "Bash(python -m pip:*)",
+      "Bash(py -m pip:*)",
+      "Bash(rm:*)",
+      "Bash(del:*)"
+    ]
+  },
+  "env": {
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8"
+  }
+}
