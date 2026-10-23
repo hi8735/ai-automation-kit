@@ -404,3 +404,30 @@ footer a { color: var(--ink-2); }
 /* 긴 명령은 줄바꿈해서 복사 버튼이 항상 보이게 */
 .cmdbox { overflow-x: visible; align-items: flex-start; }
 .cmdbox code { white-space: pre-wrap; word-break: break-all; flex: 1; min-width: 0; padding-top: 4px; }
+
+/* ── PC 폭: 문서형 2단 레이아웃 (왼쪽 섹션 제목 고정 · 오른쪽 내용) ── */
+@media (min-width: 1024px) {
+  section > .wrap.narrow {
+    max-width: 1120px;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    column-gap: 64px;
+    align-items: start;
+  }
+  section > .wrap.narrow > .sec-head {
+    grid-column: 1;
+    grid-row: 1 / span 30;
+    position: sticky;
+    top: 96px;
+    grid-template-columns: 1fr;
+    margin-bottom: 0;
+  }
+  section > .wrap.narrow > .sec-head p { grid-column: 1; }
+  section > .wrap.narrow > .sec-head .sec-num { font-size: 64px; margin-bottom: 6px; }
+  section > .wrap.narrow > :not(.sec-head) { grid-column: 2; }
+}
+
+/* 설치 가이드 히어로 */
+.hero-install .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+@media (max-width: 920px) { .hero-install .wrap { grid-template-columns: 1fr; gap: 28px; } }
+.t-ok { color: #9be7b8; font-family: var(--mono); }
