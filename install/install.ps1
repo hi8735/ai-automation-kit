@@ -22,10 +22,29 @@ function Fail($msg) {
   throw $msg
 }
 
-# 한글 사용자 이름 경로를 피하려고 C:\ai-kit 을 쓴다. 만들 수 없으면 사용자 폴더로 대신한다.
+# 한글 사용자 이름 경로를 피하려고 C:\ai-kit 을 쓴다.
+# C:\ 바로 아래 폴더는 기본적으로 같은 PC 의 다른 계정도 고칠 수 있으므로, 만든 뒤 나만 쓸 수 있게 권한을 좁힌다.
+# 이미 있는데 다른 사람이 만든 폴더면 쓰지 않고 내 사용자 폴더로 대신한다.
+$Me = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+function Use-Root($path) {
+  if (Test-Path $path) {
+    $owner = (Get-Acl $path).Owner
+    $myName = $Me.Translate([System.Security.Principal.NTAccount]).Value
+    if ($owner -ne $myName) { return $false }
+  } else {
+    New-Item -ItemType Directory -Force -Path $path | Out-Null
+  }
+  # 상속 끊고 나(현재 사용자), SYSTEM, Administrators 만 전체 권한
+  & icacls $path /inheritance:r /grant:r "*$($Me.Value):(OI)(CI)F" "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" | Out-Null
+  return ($LASTEXITCODE -eq 0)
+}
 $Root = 'C:\ai-kit'
-try { New-Item -ItemType Directory -Force -Path $Root | Out-Null }
-catch { $Root = Join-Path $env:LOCALAPPDATA 'ai-kit'; New-Item -ItemType Directory -Force -Path $Root | Out-Null }
+$ok = $false
+try { $ok = Use-Root $Root } catch { $ok = $false }
+if (-not $ok) {
+  $Root = Join-Path $env:LOCALAPPDATA 'ai-kit'
+  New-Item -ItemType Directory -Force -Path $Root | Out-Null
+}
 
 $env:UV_PYTHON_INSTALL_DIR = Join-Path $Root 'python'
 $env:UV_CACHE_DIR = Join-Path $Root 'cache'

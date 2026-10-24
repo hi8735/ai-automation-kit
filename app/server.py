@@ -13,6 +13,7 @@ import asyncio
 import json
 import os
 import re
+import shlex
 import shutil
 import socket
 import sys
@@ -158,25 +159,37 @@ TOOL_LABELS = {
 # 읽기만 하는 점검 명령은 묻지 않고 허락한다 (비개발자에게 첫 화면부터 명령 확인창을 띄우지 않기 위해).
 # 프로그램 실행(python 스크립트)·설치·삭제·파일 쓰기는 여기 해당하지 않으므로 계속 묻는다.
 READONLY_CMDS = {"ls", "dir", "pwd", "cat", "type", "head", "tail", "wc", "uname", "which", "where", "whoami",
-                 "echo", "date", "file", "stat", "test", "[", "true", "command", "Get-ChildItem", "Get-Content",
-                 "Test-Path", "Get-Location", "Write-Output"}
-VERSION_ONLY = re.compile(r"^(python3?|py|uv|node|git)(\.exe)?\s+(--version|-V)$")
+                 "date", "file", "stat", "Get-ChildItem", "Get-Content", "Test-Path", "Get-Location"}
+VERSION_ONLY = {"--version", "-V"}
+VERSION_CMDS = {"python", "python3", "py", "uv", "node", "git", "python.exe", "python3.exe", "py.exe"}
+# 출력 버리기만 허용한다 (정확히 이 모양일 때만)
+DISCARD = re.compile(r"(?<!\S)(?:2>&1|\d?>\s*/dev/null|\d?>\s*nul)(?=\s|$|[;|])", re.I)
 
 
 def is_readonly_command(cmd: str) -> bool:
-    if not cmd or re.search(r"[`$]\(|<\(", cmd):
+    """정말로 읽기만 하는 단순 명령인지 보수적으로 판단한다. 조금이라도 애매하면 False (= 사용자에게 묻는다)."""
+    if not cmd or re.search(r"[\n\r`$(){}<]", cmd):
         return False
-    # 출력 버리기(2>&1, 2>/dev/null, >nul)는 괜찮고, 파일에 쓰는 리디렉션은 안 된다
-    cleaned = re.sub(r"\d?>&\d|\d?>\s*/dev/null|\d?>\s*nul\b", "", cmd)
+    cleaned = DISCARD.sub(" ", cmd)
     if ">" in cleaned:
         return False
-    for part in re.split(r"&&|\|\||;|\|", cleaned):
+    parts = re.split(r"&&|\|\||;|\|", cleaned)
+    for part in parts:
+        if "&" in part:
+            return False
         part = part.strip()
         if not part:
             continue
-        if VERSION_ONLY.match(part):
+        try:
+            tokens = shlex.split(part, posix=True)
+        except ValueError:
+            return False
+        if not tokens:
             continue
-        if part.split()[0] not in READONLY_CMDS:
+        head = tokens[0]
+        if head in VERSION_CMDS and len(tokens) == 2 and tokens[1] in VERSION_ONLY:
+            continue
+        if head not in READONLY_CMDS:
             return False
     return True
 
