@@ -189,6 +189,8 @@ TOOL_LABELS = {
 # 프로그램 실행(python 스크립트)·설치·삭제·파일 쓰기는 여기 해당하지 않으므로 계속 묻는다.
 READONLY_CMDS = {"ls", "dir", "pwd", "cat", "type", "head", "tail", "wc", "uname", "which", "where", "whoami",
                  "stat", "Get-ChildItem", "Get-Content", "Test-Path", "Get-Location"}
+# 자동 허락 명령에 쓸 수 있는 문자 (공백은 일반 스페이스만)
+SAFE_CHARS = re.compile(r"[A-Za-z0-9 ._\-/\\:~*|;&>=,+@가-힣ㄱ-ㅎㅏ-ㅣ]+")
 # 끝나지 않고 기다리는 옵션
 FOLLOW_FLAGS = {"-f", "-F", "--follow", "-Wait"}
 VERSION_ONLY = {"--version", "-V"}
@@ -200,8 +202,9 @@ DISCARD = re.compile(r"(?<!\S)(?:2>&1|\d?>\s*/dev/null|\d?>\s*nul)(?=\s|$|[;|])"
 def is_readonly_command(cmd: str) -> bool:
     """정말로 읽기만 하는 단순 명령인지 보수적으로 판단한다. 조금이라도 애매하면 False (= 사용자에게 묻는다)."""
     # \\서버\공유 · //서버/공유 · \\?\ 같은 경로는 네트워크·장치로 나가므로 슬래시 두 개가 붙어 있으면 묻는다
-    # 따옴표·^ 는 셸마다(bash / PowerShell / cmd) 푸는 방식이 달라 검사를 속일 수 있으므로 아예 묻는다
-    if not cmd or re.search(r"[\n\r`$(){}<'\"^]", cmd) or re.search(r"[\\/]{2}", cmd):
+    # 따옴표·^·유니코드 따옴표/대시는 셸마다(bash / PowerShell / cmd) 푸는 방식이 달라 검사를 속일 수 있다.
+    # 그래서 막을 문자를 나열하지 않고, 허용한 문자(영문·숫자·한글·경로 기호)만 있을 때만 자동 허락한다.
+    if not cmd or not SAFE_CHARS.fullmatch(cmd) or re.search(r"[\\/]{2}", cmd):
         return False
     cleaned = DISCARD.sub(" ", cmd)
     if ">" in cleaned:
