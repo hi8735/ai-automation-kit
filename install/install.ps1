@@ -2,7 +2,7 @@
 # 사용법 (PowerShell 에 붙여넣기):
 #   irm https://raw.githubusercontent.com/hi8735/ai-automation-kit/main/install/install.ps1 | iex
 #
-# 하는 일: C:\ai-kit 폴더에 (1) uv(파이썬 관리 도구) (2) 코치 앱 (3) 키트 를 설치하고
+# 하는 일: 내 사용자 폴더(%LOCALAPPDATA%\ai-kit)에 (1) uv(파이썬 관리 도구) (2) 코치 앱 (3) 키트 를 설치하고
 #          바탕화면에 "AI 업무자동화 코치" 바로가기를 만든 뒤 실행한다. 관리자 권한 불필요.
 # 다시 실행하면 최신 버전으로 업데이트된다. 내 기록(results, inputs, report, automations, outputs)은 건드리지 않는다.
 
@@ -22,47 +22,9 @@ function Fail($msg) {
   throw $msg
 }
 
-# 한글 사용자 이름 경로를 피하려고 C:\ai-kit 을 쓴다.
-# C:\ 바로 아래 폴더는 기본적으로 같은 PC 의 다른 계정도 고칠 수 있으므로, 만든 뒤 나만 쓸 수 있게 권한을 좁힌다.
-# 이미 있는데 다른 사람이 만든 폴더면 쓰지 않고 내 사용자 폴더로 대신한다.
-$Me = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
-function New-PrivateSecurity {
-  # 나(현재 사용자), SYSTEM, Administrators 만 전체 권한, 상속 없음
-  $sec = New-Object System.Security.AccessControl.DirectorySecurity
-  $sec.SetAccessRuleProtection($true, $false)
-  $inh = [System.Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit'
-  $prop = [System.Security.AccessControl.PropagationFlags]::None
-  foreach ($sid in @($Me, (New-Object System.Security.Principal.SecurityIdentifier 'S-1-5-18'), (New-Object System.Security.Principal.SecurityIdentifier 'S-1-5-32-544'))) {
-    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($sid, 'FullControl', $inh, $prop, 'Allow')
-    $sec.AddAccessRule($rule)
-  }
-  return $sec
-}
-function Use-Root($path) {
-  $myName = $Me.Translate([System.Security.Principal.NTAccount]).Value
-  if (-not (Test-Path $path)) {
-    # 만드는 순간부터 제한된 권한으로 만든다 (만든 뒤 잠그는 사이의 틈을 없앤다)
-    $sec = New-PrivateSecurity
-    if ($PSVersionTable.PSEdition -eq 'Desktop') { [System.IO.Directory]::CreateDirectory($path, $sec) | Out-Null }
-    else { [System.IO.FileSystemAclExtensions]::Create([System.IO.DirectoryInfo]::new($path), $sec) }
-    return ((Get-Acl $path).Owner -eq $myName)
-  }
-  # 이미 있는 폴더: 먼저 잠그고(다른 계정이 더는 못 쓰게), 그다음 모든 파일이 내 것인지 확인한다
-  if ((Get-Acl $path).Owner -ne $myName) { return $false }
-  & icacls $path /inheritance:r /grant:r "*$($Me.Value):(OI)(CI)F" "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" | Out-Null
-  if ($LASTEXITCODE -ne 0) { return $false }
-  if (Get-ChildItem -Force $path) { & icacls "$path\*" /reset /T /C /Q | Out-Null }
-  $foreign = Get-ChildItem -Recurse -Force $path -ErrorAction SilentlyContinue |
-    Where-Object { (Get-Acl $_.FullName).Owner -ne $myName } | Select-Object -First 1
-  return (-not $foreign)
-}
-$Root = 'C:\ai-kit'
-$ok = $false
-try { $ok = Use-Root $Root } catch { $ok = $false }
-if (-not $ok) {
-  $Root = Join-Path $env:LOCALAPPDATA 'ai-kit'
-  New-Item -ItemType Directory -Force -Path $Root | Out-Null
-}
+# 내 사용자 폴더(%LOCALAPPDATA%\ai-kit)에 설치한다. 같은 PC 의 다른 계정은 이 폴더에 쓸 수 없다.
+$Root = Join-Path $env:LOCALAPPDATA 'ai-kit'
+New-Item -ItemType Directory -Force -Path $Root | Out-Null
 
 $env:UV_PYTHON_INSTALL_DIR = Join-Path $Root 'python'
 $env:UV_CACHE_DIR = Join-Path $Root 'cache'
