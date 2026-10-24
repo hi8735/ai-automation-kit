@@ -192,6 +192,19 @@
   ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => upload(e.dataTransfer.files));
 
+  // 복사한 파일·캡처 이미지를 붙여넣으면(Ctrl+V / ⌘+V) 바로 올린다. 글자만 있으면 평소처럼 붙여넣는다.
+  document.addEventListener("paste", (e) => {
+    const files = [...(e.clipboardData?.files || [])];
+    if (!files.length) return;
+    e.preventDefault();
+    const d = new Date(), p2 = (n) => String(n).padStart(2, "0");
+    const stamp = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
+    // 캡처를 붙여넣으면 이름이 모두 image.png 라서 시각을 붙여 구분한다
+    upload(files.map((f, i) => /^image\.\w+$/i.test(f.name)
+      ? new File([f], `붙여넣은 이미지 ${stamp}${files.length > 1 ? "-" + (i + 1) : ""}.${f.name.split(".").pop()}`, { type: f.type })
+      : f));
+  });
+
   // ── 로그인 확인 → 통과하면 대화 연결 ──
   const gate = $("#gate"), gTitle = $("#gate-title"), gDesc = $("#gate-desc"), gSub = $("#gate-sub"), loginBtn = $("#login-btn");
   let polling = null;
