@@ -26,23 +26,35 @@ function Fail($msg) {
 # C:\ 바로 아래 폴더는 기본적으로 같은 PC 의 다른 계정도 고칠 수 있으므로, 만든 뒤 나만 쓸 수 있게 권한을 좁힌다.
 # 이미 있는데 다른 사람이 만든 폴더면 쓰지 않고 내 사용자 폴더로 대신한다.
 $Me = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+function New-PrivateSecurity {
+  # 나(현재 사용자), SYSTEM, Administrators 만 전체 권한, 상속 없음
+  $sec = New-Object System.Security.AccessControl.DirectorySecurity
+  $sec.SetAccessRuleProtection($true, $false)
+  $inh = [System.Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit'
+  $prop = [System.Security.AccessControl.PropagationFlags]::None
+  foreach ($sid in @($Me, (New-Object System.Security.Principal.SecurityIdentifier 'S-1-5-18'), (New-Object System.Security.Principal.SecurityIdentifier 'S-1-5-32-544'))) {
+    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($sid, 'FullControl', $inh, $prop, 'Allow')
+    $sec.AddAccessRule($rule)
+  }
+  return $sec
+}
 function Use-Root($path) {
   $myName = $Me.Translate([System.Security.Principal.NTAccount]).Value
-  if (Test-Path $path) {
-    # 이미 있는 폴더면 폴더와 그 안의 모든 파일이 내 것인지 확인한다 (남이 심어둔 파일을 실행하지 않기 위해)
-    if ((Get-Acl $path).Owner -ne $myName) { return $false }
-    $foreign = Get-ChildItem -Recurse -Force $path -ErrorAction SilentlyContinue |
-      Where-Object { (Get-Acl $_.FullName).Owner -ne $myName } | Select-Object -First 1
-    if ($foreign) { return $false }
-  } else {
-    New-Item -ItemType Directory -Force -Path $path | Out-Null
-    if ((Get-Acl $path).Owner -ne $myName) { return $false }
+  if (-not (Test-Path $path)) {
+    # 만드는 순간부터 제한된 권한으로 만든다 (만든 뒤 잠그는 사이의 틈을 없앤다)
+    $sec = New-PrivateSecurity
+    if ($PSVersionTable.PSEdition -eq 'Desktop') { [System.IO.Directory]::CreateDirectory($path, $sec) | Out-Null }
+    else { [System.IO.FileSystemAclExtensions]::Create([System.IO.DirectoryInfo]::new($path), $sec) }
+    return ((Get-Acl $path).Owner -eq $myName)
   }
-  # 상속 끊고 나(현재 사용자), SYSTEM, Administrators 만 전체 권한. 하위 항목도 이 권한으로 다시 맞춘다.
+  # 이미 있는 폴더: 먼저 잠그고(다른 계정이 더는 못 쓰게), 그다음 모든 파일이 내 것인지 확인한다
+  if ((Get-Acl $path).Owner -ne $myName) { return $false }
   & icacls $path /inheritance:r /grant:r "*$($Me.Value):(OI)(CI)F" "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" | Out-Null
   if ($LASTEXITCODE -ne 0) { return $false }
   if (Get-ChildItem -Force $path) { & icacls "$path\*" /reset /T /C /Q | Out-Null }
-  return $true
+  $foreign = Get-ChildItem -Recurse -Force $path -ErrorAction SilentlyContinue |
+    Where-Object { (Get-Acl $_.FullName).Owner -ne $myName } | Select-Object -First 1
+  return (-not $foreign)
 }
 $Root = 'C:\ai-kit'
 $ok = $false
