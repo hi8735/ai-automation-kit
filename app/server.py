@@ -18,6 +18,7 @@ import shutil
 import socket
 import sys
 import threading
+import time
 import uuid
 import webbrowser
 from pathlib import Path
@@ -64,7 +65,27 @@ async def local_only(request, call_next):
     origin = request.headers.get("origin")
     if origin is not None and origin not in allowed_origins():
         return PlainTextResponse("forbidden origin", status_code=403)
+    activity["last"] = time.monotonic()
     return await call_next(request)
+
+# ── 자동 종료 ─────────────────────────────────────────
+# 코치 화면(브라우저 탭)을 모두 닫으면 서버도 스스로 꺼진다.
+# 화면은 열려 있는 동안 /api/ping 을 보내고, 대화 중에는 WebSocket 이 열려 있다.
+IDLE_LIMIT = 180  # 화면이 닫히고 이만큼(초) 지나면 끈다. 백그라운드 탭은 타이머가 1분까지 늦어질 수 있어 넉넉히 둔다
+activity = {"last": time.monotonic() + 420, "ws": 0}  # 처음 켤 때는 브라우저를 직접 열 시간을 10분 준다
+
+
+@app.get("/api/ping")
+def api_ping():
+    return {"ok": True}
+
+
+def idle_watchdog(server: uvicorn.Server):
+    while not server.should_exit:
+        time.sleep(15)
+        if activity["ws"] == 0 and time.monotonic() - activity["last"] > IDLE_LIMIT:
+            print("  코치 화면이 닫혀 있어서 코치를 껐어요. 다시 쓰려면 바탕화면 아이콘을 더블클릭하세요.")
+            server.should_exit = True
 
 # ── 로그인 ────────────────────────────────────────────
 # Agent SDK 에 함께 들어 있는 Claude Code 실행 파일로 로그인 상태를 확인하고 로그인시킨다.
@@ -284,6 +305,7 @@ async def ws_endpoint(ws: WebSocket):
         await ws.close(code=1008)
         return
     await ws.accept()
+    activity["ws"] += 1
     pending: dict[str, asyncio.Future] = {}
 
     async def send(obj: dict):
@@ -363,6 +385,8 @@ async def ws_endpoint(ws: WebSocket):
     except WebSocketDisconnect:
         pass
     finally:
+        activity["ws"] -= 1
+        activity["last"] = time.monotonic()
         pump_task.cancel()
         for fut in pending.values():
             if not fut.done():
@@ -399,7 +423,9 @@ if __name__ == "__main__":
     print("")
     print("  AI 업무자동화 코치가 켜졌어요.")
     print(f"  브라우저에서 {url} 를 여세요. (자동으로 열려요)")
-    print("  이 창을 닫으면 코치도 꺼져요. 다 쓰면 닫으셔도 돼요.")
+    print("  코치 화면(브라우저 탭)을 닫으면 3분 뒤 코치도 저절로 꺼져요. 이 창을 닫아도 꺼져요.")
     print("")
     os.environ.setdefault("PYTHONUTF8", "1")
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
+    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=PORT, log_level="warning"))
+    threading.Thread(target=idle_watchdog, args=(server,), daemon=True).start()
+    server.run()

@@ -122,7 +122,7 @@
   function connect() {
     ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
     ws.onopen = () => { statusEl.textContent = "Claude 준비 중…"; };
-    ws.onclose = () => { setBusy(false); statusEl.textContent = "연결이 끊겼어요. 새로고침하면 이어서 할 수 있어요 (기록은 저장돼 있어요)"; sendBtn.disabled = true; };
+    ws.onclose = () => { setBusy(false); statusEl.textContent = "연결이 끊겼어요. 새로고침하면 이어서 할 수 있어요. 안 되면 바탕화면 아이콘을 다시 눌러주세요 (기록은 저장돼 있어요)"; sendBtn.disabled = true; };
     ws.onmessage = (ev) => {
       const m = JSON.parse(ev.data);
       if (m.type === "ready") { setBusy(false); renderState(m.state); }
@@ -248,6 +248,9 @@
     gSub.textContent = r.ok ? "확인 중이에요…" : "로그인을 처음부터 다시 눌러주세요.";
     startPolling();
   };
+
+  // 화면이 열려 있다고 서버에 알린다. 탭을 모두 닫으면 서버가 스스로 꺼진다.
+  setInterval(() => { fetch("/api/ping").catch(() => {}); }, 30000);
 
   (async () => {
     const a = await checkAuth();
