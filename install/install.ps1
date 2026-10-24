@@ -41,7 +41,8 @@ if (-not (Test-Path $Uv)) {
   try {
     $env:UV_INSTALL_DIR = Join-Path $Root 'bin'
     $env:UV_NO_MODIFY_PATH = '1'
-    Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression | Out-Null
+    # uv 설치 스크립트 안의 exit 이 이 창을 닫지 않도록 별도 PowerShell 에서 실행한다 (환경변수는 이어받는다)
+    & powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://astral.sh/uv/install.ps1 | iex" | Out-Null
   } catch { Fail "uv 설치 실패 — $($_.Exception.Message)" }
   if (-not (Test-Path $Uv)) { Fail "uv 를 찾을 수 없어요 ($Uv). 회사 PC 라면 보안 프로그램이 막았을 수 있어요." }
 } else { Write-Host "  이미 있어요." }
