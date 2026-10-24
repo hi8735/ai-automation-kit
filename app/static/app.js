@@ -8,7 +8,11 @@
   const tools = new Map();
 
   marked.setOptions({ breaks: true });
-  const md = (t) => DOMPurify.sanitize(marked.parse(t));
+  // 링크는 새 탭으로 연다 (이 화면을 벗어나면 대화가 끊긴다). 외부 이미지는 막는다.
+  DOMPurify.addHook("afterSanitizeAttributes", (n) => {
+    if (n.tagName === "A") { n.setAttribute("target", "_blank"); n.setAttribute("rel", "noopener noreferrer"); }
+  });
+  const md = (t) => DOMPurify.sanitize(marked.parse(t), { FORBID_TAGS: ["img"] });
 
   function scroll() { log.scrollTop = log.scrollHeight; }
   function clearEmpty() { const e = $("#empty"); if (e) e.remove(); }
@@ -122,10 +126,15 @@
   function connect() {
     ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
     ws.onopen = () => { statusEl.textContent = "Claude 준비 중…"; };
-    ws.onclose = () => { setBusy(false); statusEl.textContent = "연결이 끊겼어요. 새로고침하면 이어서 할 수 있어요. 안 되면 바탕화면 아이콘을 다시 눌러주세요 (기록은 저장돼 있어요)"; sendBtn.disabled = true; };
+    ws.onclose = (ev) => {
+      setBusy(false); sendBtn.disabled = true;
+      statusEl.textContent = ev.code === 4000
+        ? "다른 탭에서 코치를 열어서 이 화면은 멈췄어요. 새로 연 탭에서 이어서 하세요"
+        : "연결이 끊겼어요. 새로고침하면 이어서 할 수 있어요. 안 되면 바탕화면 아이콘을 다시 눌러주세요 (기록은 저장돼 있어요)";
+    };
     ws.onmessage = (ev) => {
       const m = JSON.parse(ev.data);
-      if (m.type === "ready") { setBusy(false); renderState(m.state); }
+      if (m.type === "ready") { if (!busy) setBusy(false); renderState(m.state); }
       else if (m.type === "busy") setBusy(true);
       else if (m.type === "text") addClaude(m.text);
       else if (m.type === "tool") addTool(m.id, m.summary);
@@ -169,8 +178,9 @@
     for (const f of files) {
       const fd = new FormData();
       fd.append("file", f);
-      const r = await fetch("/api/upload", { method: "POST", body: fd });
-      const j = await r.json();
+      let j = null;
+      try { const r = await fetch("/api/upload", { method: "POST", body: fd }); j = r.ok ? await r.json() : null; } catch (e) {}
+      if (!j) { add(el("div", "cost", `⚠️ ${f.name} 을 올리지 못했어요 (50MB 까지 올릴 수 있어요)`)); continue; }
       add(el("div", "cost", `📎 ${j.saved} 에 올렸어요`));
       if (!busy) input.value = (input.value ? input.value + "\n" : "") + `${j.saved} 파일을 넣었어요.`;
     }
@@ -213,6 +223,11 @@
         const link = el("a", null, "여기를 눌러 직접 여세요");
         link.href = a.loginUrl; link.target = "_blank"; link.rel = "noopener";
         gSub.append(link);
+      }
+      if (a && !a.loggedIn && !a.loginRunning) {
+        clearInterval(polling); polling = null;
+        gSub.textContent = "로그인이 끝나지 않았어요. 위 버튼을 눌러 처음부터 다시 해주세요.";
+        return;
       }
       if (a && a.loggedIn) {
         clearInterval(polling); polling = null;

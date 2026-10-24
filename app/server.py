@@ -15,6 +15,7 @@ import os
 import re
 import shlex
 import shutil
+import signal
 import socket
 import sys
 import threading
@@ -98,7 +99,9 @@ def claude_cli() -> str:
     return shutil.which("claude") or "claude"
 
 
-LOGIN = {"proc": None, "url": None}
+LOGIN = {"proc": None, "url": None, "started": 0.0}
+LOGIN_LOCK = asyncio.Lock()
+LOGIN_MAX_AGE = 300  # 이보다 오래된 로그인 시도는 버리고 새로 시작한다 (로그인 주소가 만료되므로)
 
 
 @app.get("/api/auth")
@@ -126,13 +129,18 @@ async def api_auth():
 @app.post("/api/login")
 async def api_login():
     """claude auth login 을 띄운다. 보통 브라우저가 자동으로 열리고, 안 열리면 출력된 주소를 화면에 보여준다."""
-    if LOGIN["proc"] is not None and LOGIN["proc"].returncode is None:
-        return {"started": True, "url": LOGIN["url"]}
-    LOGIN["url"] = None
-    proc = await asyncio.create_subprocess_exec(
-        claude_cli(), "auth", "login", "--claudeai",
-        stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
-    LOGIN["proc"] = proc
+    async with LOGIN_LOCK:
+        old = LOGIN["proc"]
+        if old is not None and old.returncode is None:
+            if time.monotonic() - LOGIN["started"] < LOGIN_MAX_AGE:
+                return {"started": True, "url": LOGIN["url"]}
+            old.kill()
+        LOGIN["url"] = None
+        proc = await asyncio.create_subprocess_exec(
+            claude_cli(), "auth", "login", "--claudeai",
+            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
+        LOGIN["proc"] = proc
+        LOGIN["started"] = time.monotonic()
 
     async def watch():
         assert proc.stdout
@@ -180,7 +188,9 @@ TOOL_LABELS = {
 # 읽기만 하는 점검 명령은 묻지 않고 허락한다 (비개발자에게 첫 화면부터 명령 확인창을 띄우지 않기 위해).
 # 프로그램 실행(python 스크립트)·설치·삭제·파일 쓰기는 여기 해당하지 않으므로 계속 묻는다.
 READONLY_CMDS = {"ls", "dir", "pwd", "cat", "type", "head", "tail", "wc", "uname", "which", "where", "whoami",
-                 "date", "file", "stat", "Get-ChildItem", "Get-Content", "Test-Path", "Get-Location"}
+                 "stat", "Get-ChildItem", "Get-Content", "Test-Path", "Get-Location"}
+# 끝나지 않고 기다리는 옵션
+FOLLOW_FLAGS = {"-f", "-F", "--follow", "-Wait"}
 VERSION_ONLY = {"--version", "-V"}
 VERSION_CMDS = {"python", "python3", "py", "uv", "node", "git", "python.exe", "python3.exe", "py.exe"}
 # 출력 버리기만 허용한다 (정확히 이 모양일 때만)
@@ -189,7 +199,7 @@ DISCARD = re.compile(r"(?<!\S)(?:2>&1|\d?>\s*/dev/null|\d?>\s*nul)(?=\s|$|[;|])"
 
 def is_readonly_command(cmd: str) -> bool:
     """정말로 읽기만 하는 단순 명령인지 보수적으로 판단한다. 조금이라도 애매하면 False (= 사용자에게 묻는다)."""
-    if not cmd or re.search(r"[\n\r`$(){}<]", cmd):
+    if not cmd or re.search(r"[\n\r`$(){}<]", cmd) or "\\\\" in cmd:  # \\서버\공유 경로는 네트워크로 나간다
         return False
     cleaned = DISCARD.sub(" ", cmd)
     if ">" in cleaned:
@@ -213,7 +223,7 @@ def is_readonly_command(cmd: str) -> bool:
             return False
         if head in VERSION_CMDS and len(tokens) == 2 and tokens[1] in VERSION_ONLY:
             continue
-        if head not in READONLY_CMDS:
+        if head not in READONLY_CMDS or any(t in FOLLOW_FLAGS for t in tokens[1:]):
             return False
     return True
 
@@ -238,7 +248,7 @@ def tool_summary(name: str, data: dict) -> str:
     label = TOOL_LABELS.get(name, name)
     target = data.get("file_path") or data.get("path") or data.get("pattern") or data.get("skill") or ""
     if target:
-        target = str(target).replace(str(WORKSPACE) + "/", "")
+        target = str(target).replace(str(WORKSPACE) + os.sep, "").replace(str(WORKSPACE) + "/", "")
     cmd = data.get("command") or ""
     detail = target or (cmd[:80] + ("…" if len(cmd) > 80 else ""))
     return f"{label} · {detail}" if detail else label
@@ -279,13 +289,31 @@ async def api_state():
     return read_state()
 
 
+MAX_UPLOAD = 50 * 1024 * 1024
+
+
+def safe_upload_name(raw: str) -> str:
+    """경로 구분자·윈도우 금지 문자를 걷어낸 파일 이름. 비면 'file'."""
+    name = re.split(r"[\\/]", raw or "")[-1]
+    name = re.sub(r'[:*?"<>|\x00-\x1f]', "_", name).strip().strip(".").strip()
+    return name or "file"
+
+
 @app.post("/api/upload")
 async def upload(file: UploadFile = File(...)):
-    name = Path(file.filename or "file").name
-    dest = WORKSPACE / "inputs" / name
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_bytes(await file.read())
-    return {"saved": f"inputs/{name}"}
+    name = safe_upload_name(file.filename or "")
+    folder = WORKSPACE / "inputs"
+    folder.mkdir(parents=True, exist_ok=True)
+    # 같은 이름이 있으면 덮어쓰지 않고 번호를 붙인다
+    stem, suffix = Path(name).stem, Path(name).suffix
+    dest, n = folder / name, 2
+    while dest.exists():
+        dest, n = folder / f"{stem} ({n}){suffix}", n + 1
+    data = await file.read(MAX_UPLOAD + 1)
+    if len(data) > MAX_UPLOAD:
+        raise HTTPException(413, "파일이 너무 커요 (50MB 까지)")
+    dest.write_bytes(data)
+    return {"saved": f"inputs/{dest.name}"}
 
 
 @app.get("/api/file/{folder}/{name:path}")
@@ -293,9 +321,13 @@ async def get_file(folder: str, name: str):
     if folder not in ("report", "outputs"):
         raise HTTPException(404)
     path = (WORKSPACE / folder / name).resolve()
-    if not str(path).startswith(str((WORKSPACE / folder).resolve())) or not path.is_file():
+    if not path.is_relative_to((WORKSPACE / folder).resolve()) or not path.is_file():
         raise HTTPException(404)
     return FileResponse(path, filename=path.name)
+
+
+# 대화는 한 화면에서만 한다. 두 번째 탭이 열리면 앞의 탭을 멈춘다 (같은 기록 파일을 두 세션이 동시에 쓰지 않게)
+ACTIVE: dict = {"ws": None}
 
 
 @app.websocket("/ws")
@@ -306,7 +338,21 @@ async def ws_endpoint(ws: WebSocket):
         return
     await ws.accept()
     activity["ws"] += 1
+    previous, ACTIVE["ws"] = ACTIVE["ws"], ws
+    if previous is not None:
+        try:
+            await previous.close(code=4000)
+        except Exception:
+            pass
     pending: dict[str, asyncio.Future] = {}
+    client: ClaudeSDKClient | None = None
+    pump_task: asyncio.Task | None = None
+
+    def cancel_pending():
+        for fut in pending.values():
+            if not fut.done():
+                fut.set_result(False)
+        pending.clear()
 
     async def send(obj: dict):
         await ws.send_text(json.dumps(obj, ensure_ascii=False))
@@ -341,14 +387,13 @@ async def ws_endpoint(ws: WebSocket):
                       "'확인 창에서 예(Yes)를 누르라' 대신 '화면에 뜨는 허락 버튼을 눌러주세요' 라고 안내한다. "
                       "파일은 화면 왼쪽 '내 파일' 칸에 끌어다 놓으면 inputs 폴더에 들어간다고 안내한다. "
                       "Claude Code 를 다시 열라는 안내 대신 '이 화면을 새로고침하면 이어서 할 수 있어요' 라고 안내한다. "
+                      "리포트를 보낼 때는 키트 폴더 경로를 안내하지 말고, 화면 왼쪽 '내 파일 → 리포트' 를 눌러 내려받은 파일(다운로드 폴더)을 메일에 첨부하라고 안내한다. "
+                      "이 화면에는 파이썬과 openpyxl·pandas·python-docx·pypdf 가 이미 준비돼 있다. 파이썬이나 부품을 설치(winget·pip)하지 말고 바로 쓴다. "
+                      "자동화가 만든 프로그램을 다시 쓰는 방법은 '이 화면에서 /run 이름' 이라고 안내한다. "
                       "사용자에게 보이는 모든 글은 한국어로 쓴다. 도구를 쓰기 전후의 내부 작업 메모(영어 포함)는 사용자에게 쓰지 않는다.",
         },
         can_use_tool=ask_permission,
     )
-
-    client = ClaudeSDKClient(options=options)
-    await client.connect()
-    await send({"type": "ready", "state": read_state()})
 
     async def pump():
         """SDK 에서 나오는 메시지를 브라우저용 이벤트로 바꿔 보낸다."""
@@ -368,8 +413,12 @@ async def ws_endpoint(ws: WebSocket):
                 await send({"type": "done", "cost": msg.total_cost_usd, "ms": msg.duration_ms,
                             "state": read_state()})
 
-    pump_task = asyncio.create_task(pump())
     try:
+        # 연결 준비 중에 탭이 닫혀도 아래 finally 에서 정리되도록 try 안에서 연결한다
+        client = ClaudeSDKClient(options=options)
+        await client.connect()
+        await send({"type": "ready", "state": read_state()})
+        pump_task = asyncio.create_task(pump())
         while True:
             data = json.loads(await ws.receive_text())
             kind = data.get("type")
@@ -381,17 +430,23 @@ async def ws_endpoint(ws: WebSocket):
                 if fut and not fut.done():
                     fut.set_result(bool(data.get("allow")))
             elif kind == "interrupt":
+                cancel_pending()
                 await client.interrupt()
     except WebSocketDisconnect:
         pass
     finally:
         activity["ws"] -= 1
         activity["last"] = time.monotonic()
-        pump_task.cancel()
-        for fut in pending.values():
-            if not fut.done():
-                fut.set_result(False)
-        await client.disconnect()
+        if ACTIVE["ws"] is ws:
+            ACTIVE["ws"] = None
+        if pump_task:
+            pump_task.cancel()
+        cancel_pending()
+        if client:
+            try:
+                await asyncio.wait_for(client.disconnect(), 10)
+            except Exception:
+                pass
 
 
 app.mount("/", StaticFiles(directory=BASE / "static", html=True), name="static")
@@ -400,6 +455,15 @@ app.mount("/", StaticFiles(directory=BASE / "static", html=True), name="static")
 def port_in_use(port: int) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def coach_running(port: int) -> bool:
+    import urllib.request
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/ping", timeout=3) as r:
+            return json.loads(r.read()).get("ok") is True
+    except Exception:
+        return False
 
 
 if __name__ == "__main__":
@@ -414,6 +478,9 @@ if __name__ == "__main__":
     if not (WORKSPACE / "CLAUDE.md").exists():
         raise SystemExit(f"키트 폴더를 찾지 못했어요 (CLAUDE.md 없음): {WORKSPACE}")
     if port_in_use(PORT):
+        if not coach_running(PORT):
+            print(f"다른 프로그램이 {PORT} 번 포트를 쓰고 있어서 코치를 켤 수 없어요. 컴퓨터를 다시 켠 뒤 해보세요.")
+            sys.exit(1)
         # 이미 켜져 있으면 화면만 다시 연다
         print(f"이미 실행 중이에요. 브라우저로 엽니다: {url}")
         webbrowser.open(url)
@@ -426,6 +493,13 @@ if __name__ == "__main__":
     print("  코치 화면(브라우저 탭)을 닫으면 3분 뒤 코치도 저절로 꺼져요. 이 창을 닫아도 꺼져요.")
     print("")
     os.environ.setdefault("PYTHONUTF8", "1")
-    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=PORT, log_level="warning"))
+    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=PORT, log_level="warning",
+                                           timeout_graceful_shutdown=5))
     threading.Thread(target=idle_watchdog, args=(server,), daemon=True).start()
     server.run()
+    # 끝나지 않은 로그인 시도가 남지 않게 정리한다
+    if LOGIN["proc"] is not None and LOGIN["proc"].returncode is None:
+        try:
+            os.kill(LOGIN["proc"].pid, signal.SIGTERM)
+        except Exception:
+            pass

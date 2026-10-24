@@ -25,7 +25,7 @@ Claude Code 와 대화하면서 **내 업무 중 무엇을 자동화할 수 있�
 3. "이 폴더를 신뢰하시겠습니까?" → **예**
 4. `/start` 입력
 
-필요한 것: Claude 유료 플랜 + Claude Code.
+필요한 것: Claude 유료 플랜 + Claude Code. (터미널 없이 쓰려면 [코치 앱](https://hi8735.github.io/ai-automation-kit/app.html))
 
 ## 명령
 

@@ -29,24 +29,36 @@ New-Item -ItemType Directory -Force -Path $Root | Out-Null
 $env:UV_PYTHON_INSTALL_DIR = Join-Path $Root 'python'
 $env:UV_CACHE_DIR = Join-Path $Root 'cache'
 $env:UV_PYTHON_PREFERENCE = 'only-managed'
+# 파이썬 부품 환경은 app 폴더 밖에 둔다 (업데이트 때 다시 받지 않게)
+$env:UV_PROJECT_ENVIRONMENT = Join-Path $Root 'venv'
+# 여러 명이 같은 와이파이로 받을 때 느려도 끊지 않게
+$env:UV_HTTP_TIMEOUT = '300'
 $Uv = Join-Path $Root 'bin\uv.exe'
 
 Write-Host ""
 Write-Host "AI 업무자동화 코치를 설치할게요. 설치 위치: $Root" -ForegroundColor Green
 Write-Host "처음엔 3~5분 걸릴 수 있어요. 창을 닫지 말고 기다려주세요."
 
+# 코치가 켜져 있으면 파일이 잠겨 업데이트가 안 되므로 먼저 끈다 (이 설치 폴더 안의 프로그램만)
+Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($Root, [StringComparison]::OrdinalIgnoreCase) } |
+  ForEach-Object { Write-Host "  켜져 있던 코치를 끌게요."; Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Milliseconds 1500
+
 Step 1 '준비 도구(uv) 설치'
 # 기존 uv 를 믿지 않고 매번 새로 받는다
 $UvDir = Join-Path $Root 'bin'
-if (Test-Path $UvDir) { Remove-Item -Recurse -Force $UvDir }
+try { if (Test-Path $UvDir) { Remove-Item -Recurse -Force $UvDir } } catch { Fail "이전 파일을 지우지 못했어요. 코치 창을 모두 닫고 다시 해주세요. ($($_.Exception.Message))" }
 if ($true) {
   try {
     $env:UV_INSTALL_DIR = Join-Path $Root 'bin'
     $env:UV_NO_MODIFY_PATH = '1'
     # uv 설치 스크립트 안의 exit 이 이 창을 닫지 않도록 별도 PowerShell 에서 실행한다 (환경변수는 이어받는다)
-    & powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://astral.sh/uv/install.ps1 | iex" | Out-Null
+    $UvLog = & powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://astral.sh/uv/install.ps1 | iex" 2>&1 | Out-String
   } catch { Fail "uv 설치 실패 — $($_.Exception.Message)" }
-  if (-not (Test-Path $Uv)) { Fail "uv 를 찾을 수 없어요 ($Uv). 회사 PC 라면 보안 프로그램이 막았을 수 있어요." }
+  if (-not (Test-Path $Uv)) {
+    Write-Host $UvLog
+    Fail "uv 를 찾을 수 없어요 ($Uv). 회사 PC 라면 보안 프로그램이 막았을 수 있어요."
+  }
 }
 
 Step 2 '코치 앱 내려받기'
@@ -61,7 +73,7 @@ try {
 Step 3 '앱과 키트 설치'
 $AppDir = Join-Path $Root 'app'
 $Ws = Join-Path $Root 'workspace'
-if (Test-Path $AppDir) { Remove-Item -Recurse -Force $AppDir }
+try { if (Test-Path $AppDir) { Remove-Item -Recurse -Force $AppDir } } catch { Fail "이전 앱을 지우지 못했어요. 코치 창을 모두 닫고 다시 해주세요. ($($_.Exception.Message))" }
 Copy-Item -Recurse -Force (Join-Path $Tmp 'ai-automation-kit-app\app') $AppDir
 New-Item -ItemType Directory -Force -Path $Ws | Out-Null
 Get-ChildItem -Force (Join-Path $Tmp 'ai-automation-kit-app\kit') | ForEach-Object {
@@ -81,34 +93,58 @@ Remove-Item -Recurse -Force $Tmp
 
 Step 4 '파이썬과 필요한 부품 설치 (처음엔 조금 걸려요)'
 & $Uv sync --project $AppDir --frozen --quiet
-if ($LASTEXITCODE -ne 0) { Fail "부품 설치 실패 (uv sync)" }
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "  한 번 더 시도할게요..." -ForegroundColor Yellow
+  & $Uv sync --project $AppDir --frozen
+  if ($LASTEXITCODE -ne 0) { Fail "부품 설치 실패 (uv sync). 인터넷이 느리거나 회사 네트워크가 막았을 수 있어요." }
+}
 
 Step 5 '바탕화면 바로가기 만들기'
 $Start = Join-Path $Root 'start.cmd'
-@"
+# 경로는 실행할 때 %LOCALAPPDATA% 로 만든다. 한글 사용자 이름이 들어간 경로를 ASCII 파일에 적으면 ? 로 깨지기 때문.
+@'
 @echo off
 chcp 65001 >nul
 title AI Coach - close this window to stop
-set "UV_PYTHON_INSTALL_DIR=$Root\python"
-set "UV_CACHE_DIR=$Root\cache"
+set "R=%LOCALAPPDATA%\ai-kit"
+set "UV_PYTHON_INSTALL_DIR=%R%\python"
+set "UV_CACHE_DIR=%R%\cache"
+set "UV_PROJECT_ENVIRONMENT=%R%\venv"
 set "UV_PYTHON_PREFERENCE=only-managed"
 set "PYTHONUTF8=1"
-"$Uv" run --project "$AppDir" --frozen --quiet python "$AppDir\server.py" --workspace "$Ws" --open
+"%R%\bin\uv.exe" run --project "%R%\app" --frozen --quiet python "%R%\app\server.py" --workspace "%R%\workspace" --open
 if errorlevel 1 pause
-"@ | Set-Content -Encoding ASCII -Path $Start
+'@ | Set-Content -Encoding ASCII -Path $Start
 
-try {
-  $Desktop = [Environment]::GetFolderPath('Desktop')
+function New-CoachShortcut($Folder, $Name) {
+  if (-not $Folder -or -not (Test-Path $Folder)) { return $null }
+  $Path = Join-Path $Folder $Name
   $Shell = New-Object -ComObject WScript.Shell
-  $Lnk = $Shell.CreateShortcut((Join-Path $Desktop 'AI 업무자동화 코치.lnk'))
-  $Lnk.TargetPath = $Start
-  $Lnk.WorkingDirectory = $Root
+  $Lnk = $Shell.CreateShortcut($Path)
+  # 한글 사용자 이름 경로가 바로가기 안에서 깨지지 않게 환경변수로 적는다 (실행할 때 풀린다)
+  $Lnk.TargetPath = '%LOCALAPPDATA%\ai-kit\start.cmd'
+  $Lnk.WorkingDirectory = '%LOCALAPPDATA%\ai-kit'
   $Lnk.IconLocation = "$env:SystemRoot\System32\shell32.dll,13"
   $Lnk.Save()
-  Write-Host "  바탕화면에 'AI 업무자동화 코치' 아이콘을 만들었어요."
-} catch { Write-Host "  바로가기는 만들지 못했어요. 다음부터는 $Start 를 더블클릭하세요." -ForegroundColor Yellow }
+  if (Test-Path $Path) { return $Path } else { return $null }
+}
+$Made = $null
+$Desktop = [Environment]::GetFolderPath('Desktop')
+foreach ($Name in @('AI 업무자동화 코치.lnk', 'AI-Coach.lnk')) {
+  try { $Made = New-CoachShortcut $Desktop $Name } catch { Write-Host "  ($($_.Exception.Message))" -ForegroundColor DarkGray }
+  if ($Made) { break }
+}
+if (-not $Made) {
+  # 바탕화면에 못 만들면 바탕화면에 실행 파일을 복사해 둔다
+  try { if ($Desktop -and (Test-Path $Desktop)) { Copy-Item -Force $Start (Join-Path $Desktop 'AI-Coach.cmd'); $Made = Join-Path $Desktop 'AI-Coach.cmd' } } catch {}
+}
+# 시작 메뉴에도 넣어 둔다 (Windows 키 → "AI" 검색으로 찾을 수 있게)
+try { [void](New-CoachShortcut ([Environment]::GetFolderPath('Programs')) 'AI 업무자동화 코치.lnk') } catch {}
+if ($Made) { Write-Host "  바탕화면에 실행 아이콘을 만들었어요: $Made" }
+else { Write-Host "  바탕화면 아이콘은 만들지 못했어요." -ForegroundColor Yellow }
 
 Write-Host ""
 Write-Host "설치 완료! 코치를 켤게요. 브라우저가 열리면 Claude 계정으로 로그인하세요." -ForegroundColor Green
 Write-Host "다음부터는 바탕화면의 'AI 업무자동화 코치' 아이콘을 더블클릭하면 돼요."
+Write-Host "아이콘이 안 보이면: Windows 키 + R 을 누르고 %LOCALAPPDATA%\ai-kit\start.cmd 를 붙여넣은 뒤 Enter" -ForegroundColor Yellow
 Start-Process -FilePath $Start -WorkingDirectory $Root

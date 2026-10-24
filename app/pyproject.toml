@@ -8,6 +8,11 @@ dependencies = [
   "fastapi==0.162.0",
   "uvicorn[standard]==0.54.0",
   "python-multipart==0.0.32",
+  # 자동화 프로그램이 바로 쓸 수 있게 미리 넣어 둔다 (이 환경에는 pip 가 없다)
+  "openpyxl",
+  "pandas",
+  "python-docx",
+  "pypdf",
 ]
 
 [tool.uv]

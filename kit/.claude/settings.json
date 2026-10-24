@@ -5,6 +5,7 @@
       "Read",
       "Glob",
       "Grep",
+      "Skill",
       "Bash(python --version)",
       "Bash(python3 --version)",
       "Bash(py --version)",

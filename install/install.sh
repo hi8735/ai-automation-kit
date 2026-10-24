@@ -14,6 +14,10 @@ UV="$ROOT/bin/uv"
 export UV_PYTHON_INSTALL_DIR="$ROOT/python"
 export UV_CACHE_DIR="$ROOT/cache"
 export UV_PYTHON_PREFERENCE=only-managed
+# 파이썬 부품 환경은 app 폴더 밖에 둔다 (업데이트 때 다시 받지 않게)
+export UV_PROJECT_ENVIRONMENT="$ROOT/venv"
+# 여러 명이 같은 와이파이로 받을 때 느려도 끊지 않게
+export UV_HTTP_TIMEOUT=300
 
 step() { printf '\n\033[36m[%s/5] %s\033[0m\n' "$1" "$2"; }
 fail() {
@@ -26,6 +30,9 @@ trap 'fail "예상하지 못한 오류 (줄 $LINENO)"' ERR
 mkdir -p "$ROOT"
 printf '\n\033[32mAI 업무자동화 코치를 설치할게요. 설치 위치: %s\033[0m\n' "$ROOT"
 echo "처음엔 3~5분 걸릴 수 있어요. 창을 닫지 말고 기다려주세요."
+
+# 코치가 켜져 있으면 먼저 끈다 (업데이트 중 파일이 바뀌지 않게)
+if pkill -f "$ROOT/app/server.py" 2>/dev/null; then echo "  켜져 있던 코치를 껐어요."; sleep 1; fi
 
 step 1 "준비 도구(uv) 설치"
 if [ ! -x "$UV" ]; then
@@ -63,9 +70,12 @@ done
 rm -rf "$TMP"
 
 step 4 "파이썬과 필요한 부품 설치 (처음엔 조금 걸려요)"
-"$UV" sync --project "$ROOT/app" --frozen --quiet || fail "부품 설치 실패 (uv sync)"
+"$UV" sync --project "$ROOT/app" --frozen --quiet \
+  || { echo "  한 번 더 시도할게요..."; "$UV" sync --project "$ROOT/app" --frozen; } \
+  || fail "부품 설치 실패 (uv sync). 인터넷이 느리거나 회사 네트워크가 막았을 수 있어요."
 
 step 5 "바탕화면 실행 파일 만들기"
+mkdir -p "$HOME/Desktop"
 LAUNCHER="$HOME/Desktop/AI 업무자동화 코치.command"
 cat > "$LAUNCHER" <<EOF
 #!/bin/bash
@@ -73,6 +83,7 @@ cat > "$LAUNCHER" <<EOF
 export UV_PYTHON_INSTALL_DIR="$ROOT/python"
 export UV_CACHE_DIR="$ROOT/cache"
 export UV_PYTHON_PREFERENCE=only-managed
+export UV_PROJECT_ENVIRONMENT="$ROOT/venv"
 export PYTHONUTF8=1
 exec "$UV" run --project "$ROOT/app" --frozen --quiet python "$ROOT/app/server.py" --workspace "$WS" --open
 EOF
