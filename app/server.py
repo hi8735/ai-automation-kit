@@ -180,13 +180,16 @@ def is_readonly_command(cmd: str) -> bool:
         part = part.strip()
         if not part:
             continue
+        # 명령 이름은 원문 그대로 비교한다 (따옴표·역슬래시로 꾸민 이름이 풀려서 통과하지 않게)
+        head = part.split()[0]
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9._-]*", head):
+            return False
         try:
             tokens = shlex.split(part, posix=True)
         except ValueError:
             return False
-        if not tokens:
-            continue
-        head = tokens[0]
+        if not tokens or tokens[0] != head:
+            return False
         if head in VERSION_CMDS and len(tokens) == 2 and tokens[1] in VERSION_ONLY:
             continue
         if head not in READONLY_CMDS:

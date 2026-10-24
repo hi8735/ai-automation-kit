@@ -27,16 +27,22 @@ function Fail($msg) {
 # 이미 있는데 다른 사람이 만든 폴더면 쓰지 않고 내 사용자 폴더로 대신한다.
 $Me = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
 function Use-Root($path) {
+  $myName = $Me.Translate([System.Security.Principal.NTAccount]).Value
   if (Test-Path $path) {
-    $owner = (Get-Acl $path).Owner
-    $myName = $Me.Translate([System.Security.Principal.NTAccount]).Value
-    if ($owner -ne $myName) { return $false }
+    # 이미 있는 폴더면 폴더와 그 안의 모든 파일이 내 것인지 확인한다 (남이 심어둔 파일을 실행하지 않기 위해)
+    if ((Get-Acl $path).Owner -ne $myName) { return $false }
+    $foreign = Get-ChildItem -Recurse -Force $path -ErrorAction SilentlyContinue |
+      Where-Object { (Get-Acl $_.FullName).Owner -ne $myName } | Select-Object -First 1
+    if ($foreign) { return $false }
   } else {
     New-Item -ItemType Directory -Force -Path $path | Out-Null
+    if ((Get-Acl $path).Owner -ne $myName) { return $false }
   }
-  # 상속 끊고 나(현재 사용자), SYSTEM, Administrators 만 전체 권한
+  # 상속 끊고 나(현재 사용자), SYSTEM, Administrators 만 전체 권한. 하위 항목도 이 권한으로 다시 맞춘다.
   & icacls $path /inheritance:r /grant:r "*$($Me.Value):(OI)(CI)F" "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" | Out-Null
-  return ($LASTEXITCODE -eq 0)
+  if ($LASTEXITCODE -ne 0) { return $false }
+  if (Get-ChildItem -Force $path) { & icacls "$path\*" /reset /T /C /Q | Out-Null }
+  return $true
 }
 $Root = 'C:\ai-kit'
 $ok = $false
@@ -56,7 +62,10 @@ Write-Host "AI 업무자동화 코치를 설치할게요. 설치 위치: $Root" 
 Write-Host "처음엔 3~5분 걸릴 수 있어요. 창을 닫지 말고 기다려주세요."
 
 Step 1 '준비 도구(uv) 설치'
-if (-not (Test-Path $Uv)) {
+# 기존 uv 를 믿지 않고 매번 새로 받는다
+$UvDir = Join-Path $Root 'bin'
+if (Test-Path $UvDir) { Remove-Item -Recurse -Force $UvDir }
+if ($true) {
   try {
     $env:UV_INSTALL_DIR = Join-Path $Root 'bin'
     $env:UV_NO_MODIFY_PATH = '1'
@@ -64,7 +73,7 @@ if (-not (Test-Path $Uv)) {
     & powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://astral.sh/uv/install.ps1 | iex" | Out-Null
   } catch { Fail "uv 설치 실패 — $($_.Exception.Message)" }
   if (-not (Test-Path $Uv)) { Fail "uv 를 찾을 수 없어요 ($Uv). 회사 PC 라면 보안 프로그램이 막았을 수 있어요." }
-} else { Write-Host "  이미 있어요." }
+}
 
 Step 2 '코치 앱 내려받기'
 $Tmp = Join-Path $Root '_download'
