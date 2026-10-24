@@ -2,9 +2,6 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
-      "Read",
-      "Glob",
-      "Grep",
       "Skill",
       "Bash(python --version)",
       "Bash(python3 --version)",
@@ -24,6 +21,17 @@
       "Bash(py -m pip:*)",
       "Bash(rm:*)",
       "Bash(del:*)"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.kube/**)",
+      "Read(~/.claude/.credentials.json)",
+      "Read(~/.claude.json)",
+      "Read(~/.git-credentials)",
+      "Read(**/.env)",
+      "Read(**/.env.*)"
     ]
   },
   "env": {

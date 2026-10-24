@@ -34,7 +34,22 @@
     scroll();
   }
 
-  function addUser(text) { add(el("div", "msg u", text)); }
+  function addUser(text, files = []) {
+    const m = el("div", "msg u");
+    if (files.length) {
+      const th = el("div", "thumbs");
+      files.forEach((p) => {
+        if (p.url) {
+          const img = el("img"); img.src = p.url; img.alt = p.file.name; img.title = p.file.name;
+          img.onclick = () => window.open(p.url, "_blank");
+          th.append(img);
+        } else th.append(el("span", "file-chip", "📄 " + p.file.name));
+      });
+      m.append(th);
+    }
+    if (text) m.append(el("div", null, text));
+    add(m);
+  }
 
   function addClaude(text) {
     const wrap = el("div", "msg c");
@@ -148,15 +163,26 @@
     };
   }
 
-  function submit(text) {
-    text = (text ?? input.value).trim();
-    if (!text || busy || !ws || ws.readyState !== 1) return;
+  async function submit(text) {
+    if (busy || !ws || ws.readyState !== 1) return;
+    const fromInput = text == null;
+    const typed = (fromInput ? input.value : text).trim();
+    const items = fromInput ? pending : [];  // 빠른 버튼(/start 등)은 첨부를 같이 보내지 않는다
+    if (!typed && !items.length) return;
+    if (fromInput) { pending = []; renderTray(); input.value = ""; autosize(); }
     quick.innerHTML = "";
-    addUser(text);
-    ws.send(JSON.stringify({ type: "user", text }));
-    input.value = "";
-    autosize();
     setBusy(true);
+    addUser(typed, items);
+    const saved = [];
+    for (const p of items) {
+      const name = await uploadOne(p.file);
+      if (name) saved.push(name); else add(el("div", "cost", `⚠️ ${p.file.name} 을 올리지 못했어요 (50MB 까지 올릴 수 있어요)`));
+    }
+    if (items.length) refreshState();
+    const note = saved.length ? `(첨부한 파일: ${saved.join(", ")})` : "";
+    const msg = [typed || (saved.length ? "파일을 올렸어요." : ""), note].filter(Boolean).join("\n");
+    if (!msg) { setBusy(false); return; }
+    ws.send(JSON.stringify({ type: "user", text: msg }));
   }
 
   function autosize() { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 180) + "px"; }
@@ -174,6 +200,11 @@
 
   // 파일 올리기 (선택 · 끌어다 놓기)
   const drop = $("#drop"), fileInput = $("#file");
+  async function uploadOne(f) {
+    const fd = new FormData();
+    fd.append("file", f);
+    try { const r = await fetch("/api/upload", { method: "POST", body: fd }); return r.ok ? (await r.json()).saved : null; } catch (e) { return null; }
+  }
   async function upload(files) {
     for (const f of files) {
       const fd = new FormData();
@@ -192,18 +223,67 @@
   ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => upload(e.dataTransfer.files));
 
-  // 복사한 파일·캡처 이미지를 붙여넣으면(Ctrl+V / ⌘+V) 바로 올린다. 글자만 있으면 평소처럼 붙여넣는다.
-  document.addEventListener("paste", (e) => {
-    const files = [...(e.clipboardData?.files || [])];
-    if (!files.length) return;
-    e.preventDefault();
-    const d = new Date(), p2 = (n) => String(n).padStart(2, "0");
-    const stamp = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
+  // ── 첨부 (메신저처럼): 붙여넣기·대화창에 끌어다 놓기 → 썸네일로 쌓아 두고 → 보내기 누를 때 함께 올린다 ──
+  const tray = $("#tray");
+  let pending = [];  // { file, url }
+  const MAX_SIZE = 50 * 1024 * 1024;
+
+  function renameCapture(f, i, n) {
     // 캡처를 붙여넣으면 이름이 모두 image.png 라서 시각을 붙여 구분한다
-    upload(files.map((f, i) => /^image\.\w+$/i.test(f.name)
-      ? new File([f], `붙여넣은 이미지 ${stamp}${files.length > 1 ? "-" + (i + 1) : ""}.${f.name.split(".").pop()}`, { type: f.type })
-      : f));
+    if (!/^image\.\w+$/i.test(f.name)) return f;
+    const d = new Date(), p2 = (x) => String(x).padStart(2, "0");
+    const stamp = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
+    return new File([f], `붙여넣은 이미지 ${stamp}${n > 1 || pending.length ? "-" + (pending.length + i + 1) : ""}.${f.name.split(".").pop()}`, { type: f.type });
+  }
+
+  function attach(files) {
+    files = files.filter(Boolean);
+    files.forEach((raw, i) => {
+      const f = renameCapture(raw, i, files.length);
+      if (f.size > MAX_SIZE) { add(el("div", "cost", `⚠️ ${f.name} 은 50MB 가 넘어서 올릴 수 없어요`)); return; }
+      pending.push({ file: f, url: f.type.startsWith("image/") ? URL.createObjectURL(f) : null });
+    });
+    renderTray();
+    input.focus();
+  }
+
+  function renderTray() {
+    tray.innerHTML = "";
+    tray.hidden = !pending.length;
+    pending.forEach((p, i) => {
+      const chip = el("div", "att");
+      chip.title = p.file.name;
+      if (p.url) { const img = el("img"); img.src = p.url; img.alt = p.file.name; chip.append(img); }
+      else { chip.classList.add("doc"); chip.append(el("span", "att-ico", "📄"), el("span", "att-name", p.file.name)); }
+      const x = el("button", "att-x", "×");
+      x.type = "button"; x.setAttribute("aria-label", `${p.file.name} 빼기`);
+      x.onclick = () => { if (p.url) URL.revokeObjectURL(p.url); pending.splice(i, 1); renderTray(); };
+      chip.append(x);
+      tray.append(chip);
+    });
+  }
+
+  function clipboardFiles(cd) {
+    if (!cd) return [];
+    const files = [...(cd.files || [])];
+    if (files.length) return files;
+    // 일부 브라우저(사파리 등)는 files 대신 items 로만 준다
+    return [...(cd.items || [])].filter((it) => it.kind === "file").map((it) => it.getAsFile());
+  }
+
+  document.addEventListener("paste", (e) => {
+    if (e.target && e.target.id === "code-input") return;
+    const files = clipboardFiles(e.clipboardData);
+    if (!files.length) return;  // 글자만 있으면 평소처럼 붙여넣는다
+    e.preventDefault();
+    attach(files);
   });
+
+  // 대화창 쪽에 끌어다 놓아도 첨부로 쌓인다 (왼쪽 '내 파일' 칸은 바로 올리기)
+  const chatArea = $(".chat");
+  ["dragover", "dragenter"].forEach((t) => chatArea.addEventListener(t, (e) => { if (e.dataTransfer?.types?.includes("Files")) { e.preventDefault(); chatArea.classList.add("over"); } }));
+  ["dragleave", "drop"].forEach((t) => chatArea.addEventListener(t, () => chatArea.classList.remove("over")));
+  chatArea.addEventListener("drop", (e) => { if (e.dataTransfer?.files?.length) { e.preventDefault(); attach([...e.dataTransfer.files]); } });
 
   // ── 로그인 확인 → 통과하면 대화 연결 ──
   const gate = $("#gate"), gTitle = $("#gate-title"), gDesc = $("#gate-desc"), gSub = $("#gate-sub"), loginBtn = $("#login-btn");

@@ -110,3 +110,17 @@ button { font: inherit; cursor: pointer; }
 .code-row button { border: 0; border-radius: 10px; padding: 10px 16px; background: var(--ink); color: #fff; font-weight: 700; }
 .perm details { margin-top: 6px; font-size: 13px; color: var(--ink-2); }
 .perm summary { cursor: pointer; }
+
+/* 첨부 트레이 (메신저처럼) */
+.tray { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px clamp(16px, 5vw, 64px) 0; }
+.att { position: relative; width: 72px; height: 72px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); overflow: hidden; }
+.att img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.att.doc { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; }
+.att-ico { font-size: 22px; line-height: 1; }
+.att-name { font-size: 10.5px; line-height: 1.25; text-align: center; color: var(--ink-2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-all; }
+.att-x { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; border: 0; padding: 0; background: rgba(21, 24, 31, .72); color: #fff; font-size: 14px; line-height: 20px; cursor: pointer; }
+.msg .thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.msg .thumbs img { width: 120px; height: 90px; object-fit: cover; border-radius: 8px; cursor: zoom-in; display: block; }
+.msg .thumbs .file-chip { font-size: 13px; padding: 4px 8px; border-radius: 8px; background: rgba(255, 255, 255, .9); color: var(--ink); border: 1px solid var(--line); }
+.chat.over { outline: 2px dashed var(--accent); outline-offset: -6px; }
+.msg .thumbs .file-chip { align-self: flex-start; }

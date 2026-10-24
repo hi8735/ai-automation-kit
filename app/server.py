@@ -35,6 +35,7 @@ from claude_agent_sdk import (
     AssistantMessage,
     ClaudeAgentOptions,
     ClaudeSDKClient,
+    HookMatcher,
     ResultMessage,
     TextBlock,
     ToolResultBlock,
@@ -199,6 +200,62 @@ VERSION_CMDS = {"python", "python3", "py", "uv", "node", "git", "python.exe", "p
 DISCARD = re.compile(r"(?<!\S)(?:2>&1|\d?>\s*/dev/null|\d?>\s*nul)(?=\s|$|[;|])", re.I)
 
 
+# ── 키트 폴더 밖 보호 ─────────────────────────────────
+# 코치는 키트 폴더(workspace) 안에서만 파일을 읽고 쓴다. 바탕화면·문서·다른 폴더는 건드리지 않는다.
+FILE_TOOLS = ("Read", "Write", "Edit", "MultiEdit", "NotebookEdit", "Glob", "Grep")
+OUTSIDE_MSG = ("이 코치는 키트 폴더 밖의 파일·폴더는 읽거나 고치지 않습니다. "
+               "필요한 파일이 있으면 사용자에게 화면 왼쪽 '내 파일' 칸에 끌어다 놓거나 입력창에 붙여넣어 달라고 쉬운 말로 요청하세요.")
+
+
+def inside_workspace(raw: str) -> bool:
+    """경로가 키트 폴더 안인지. 환경변수·~ 를 풀고, 상대 경로는 키트 폴더 기준으로 본다. 애매하면 False."""
+    try:
+        text = os.path.expandvars(os.path.expanduser(str(raw).strip()))
+        if "$" in text or "%" in text:
+            return False  # 풀리지 않은 변수
+        if os.name != "nt" and re.match(r"^[A-Za-z]:", text):
+            return False  # 윈도우 드라이브 경로 (윈도우에서는 아래에서 그대로 판정된다)
+        path = Path(text)
+        if not path.is_absolute():
+            path = WORKSPACE / path
+        resolved = os.path.normcase(str(path.resolve()))
+        root = os.path.normcase(str(WORKSPACE.resolve()))
+        return Path(resolved).is_relative_to(Path(root))
+    except Exception:
+        return False
+
+
+PATHLIKE = re.compile(r"^(?:[A-Za-z]:[\\/]|[\\/]|~|\$|%|.*\.\.)")
+DEVNULL = {"/dev/null", "nul", "NUL", "$null"}
+
+
+def outside_paths(cmd: str) -> list[str]:
+    """명령에 들어 있는 경로 중 키트 폴더 밖을 가리키는 것."""
+    found = []
+    for tok in re.split(r"[\s'\"=,;|&()<>]+", cmd or ""):
+        tok = re.sub(r"^\d?>+", "", tok)
+        if not tok or tok in DEVNULL or not PATHLIKE.match(tok):
+            continue
+        if not inside_workspace(tok):
+            found.append(tok)
+    return found
+
+
+async def guard_outside(input_data, tool_use_id, context):
+    """도구를 쓰기 직전에 확인한다 (권한 규칙보다 먼저 돈다). 키트 폴더 밖 파일 작업은 막는다."""
+    tool = input_data.get("tool_name", "")
+    data = input_data.get("tool_input") or {}
+    targets = [data.get(k) for k in ("file_path", "path", "notebook_path") if data.get(k)]
+    if tool == "Glob" and data.get("pattern"):
+        targets.append(data["pattern"])  # 패턴이 절대 경로일 수 있다
+    for t in targets:
+        if (tool != "Glob" or t != data.get("pattern") or PATHLIKE.match(str(t))) and not inside_workspace(t):
+            return {"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                           "permissionDecision": "deny",
+                                           "permissionDecisionReason": OUTSIDE_MSG}}
+    return {}
+
+
 def is_readonly_command(cmd: str) -> bool:
     """정말로 읽기만 하는 단순 명령인지 보수적으로 판단한다. 조금이라도 애매하면 False (= 사용자에게 묻는다)."""
     # \\서버\공유 · //서버/공유 · \\?\ 같은 경로는 네트워크·장치로 나가므로 슬래시 두 개가 붙어 있으면 묻는다
@@ -233,7 +290,16 @@ def is_readonly_command(cmd: str) -> bool:
             return False
         if head not in READONLY_CMDS or any(t in FOLLOW_FLAGS for t in tokens[1:]):
             return False
-    return True
+    # 키트 폴더 밖을 보는 명령은 읽기만이라도 묻는다
+    return not outside_paths(cmd)
+
+
+def outside_warning(name: str, data: dict) -> str | None:
+    if name in ("Bash", "PowerShell"):
+        out = outside_paths(data.get("command", ""))
+        if out:
+            return f"⚠️ 키트 폴더 밖({out[0][:60]})을 건드리는 명령이에요. 무슨 일인지 확실하지 않으면 '거절' 을 눌러주세요."
+    return None
 
 
 def plain_description(name: str, data: dict) -> str:
@@ -369,6 +435,9 @@ async def ws_endpoint(ws: WebSocket):
         """키트 설정상 확인이 필요한 동작(프로그램 실행·설치 등)을 브라우저 버튼으로 묻는다."""
         if tool_name in ("Bash", "PowerShell") and is_readonly_command(data.get("command", "")):
             return PermissionResultAllow(updated_input=data)
+        if tool_name in FILE_TOOLS:
+            # 키트 폴더 밖은 훅에서 이미 막혔다. 여기 온 것은 키트 안 작업이다
+            return PermissionResultAllow(updated_input=data)
         rid = uuid.uuid4().hex
         fut = asyncio.get_running_loop().create_future()
         pending[rid] = fut
@@ -376,7 +445,7 @@ async def ws_endpoint(ws: WebSocket):
             "type": "permission",
             "id": rid,
             "tool": tool_name,
-            "summary": plain_description(tool_name, data),
+            "summary": outside_warning(tool_name, data) or plain_description(tool_name, data),
             "command": data.get("command"),
             "description": data.get("description") or getattr(ctx, "description", None),
         })
@@ -401,6 +470,7 @@ async def ws_endpoint(ws: WebSocket):
                       "사용자에게 보이는 모든 글은 한국어로 쓴다. 도구를 쓰기 전후의 내부 작업 메모(영어 포함)는 사용자에게 쓰지 않는다.",
         },
         can_use_tool=ask_permission,
+        hooks={"PreToolUse": [HookMatcher(matcher="|".join(FILE_TOOLS), hooks=[guard_outside])]},
     )
 
     async def pump():
