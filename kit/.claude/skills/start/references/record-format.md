@@ -8,7 +8,7 @@
 
 ```markdown
 ---
-kit_version: v1.2
+kit_version: v1.5
 daangn_nickname: (당근 모임 닉네임 — 리포트·메일 제목에 쓴다)
 call_name: (대화에서 부를 호칭, 따로 없으면 당근 닉네임)
 os: windows | mac

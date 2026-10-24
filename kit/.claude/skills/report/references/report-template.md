@@ -4,7 +4,7 @@
 
 ```markdown
 ---
-kit_version: v1.2
+kit_version: v1.5
 daangn_nickname: 하늘바다          # 당근 모임 닉네임 (본인 확인 받은 그대로)
 job: 구매 담당
 industry: 중견 제조업
