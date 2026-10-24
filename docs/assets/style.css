@@ -440,3 +440,21 @@ h1 { font-weight: 800; line-height: 1.22; }
 .steps > li::before { font-weight: 700; }
 body { letter-spacing: -.01em; }
 .t-user { font-family: var(--sans); font-weight: 500; }
+
+/* 상황 고르기 */
+.choose { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 1000px) { .choose { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .choose { grid-template-columns: 1fr; } }
+.pick { display: flex; flex-direction: column; gap: 8px; padding: 22px; text-decoration: none; color: var(--ink); transition: transform .15s, border-color .15s; }
+.pick:hover { transform: translateY(-2px); border-color: var(--ink-3); color: var(--ink); }
+.pick-n { width: 30px; height: 30px; border-radius: 50%; background: var(--paper-2); display: grid; place-items: center; font-weight: 800; }
+.pick b { font-size: 17px; line-height: 1.45; }
+.pick b small { font-weight: 500; color: var(--ink-3); font-size: 14px; }
+.pick > span:last-child { color: var(--ink-2); font-size: 14.5px; }
+.pick em { font-style: normal; font-size: 12px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 8px; margin-right: 4px; }
+.pick.recommended { border: 2px solid var(--accent); }
+.pick.recommended .pick-n { background: var(--accent); color: #fff; }
+.side-note { margin-top: 16px; padding: 20px 22px; display: none; }
+.side-note:target { display: block; }
+.side-note h3 { font-size: 18px; margin-bottom: 6px; }
+.side-note p { margin: 0 0 6px; color: var(--ink-2); }

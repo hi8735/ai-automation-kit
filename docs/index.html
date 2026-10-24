@@ -38,22 +38,18 @@
       <h1>내 업무,<br><em>어디까지</em> 자동화될까?</h1>
       <p class="lede">Claude 가 1:1 인터뷰처럼 하나씩 물어보면서, 익숙해서 눈에 안 보이던 반복 업무를 찾아냅니다. 조건이 맞으면 그 자리에서 첫 자동화까지 만들어 봐요.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="https://github.com/hi8735/ai-automation-kit/releases/latest/download/ai-automation-kit.zip">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-          키트 다운로드 (zip)
-        </a>
-        <a class="btn btn-ghost" href="#start">시작 방법 보기</a>
+        <a class="btn btn-primary" href="#choose">내 상황에 맞게 시작하기 →</a>
       </div>
       <div class="hero-meta">
         <span>걸리는 시간 <b>30~60분</b></span>
         <span>필요한 것 <b>Claude 유료 플랜 + Claude Code</b></span>
         <span>Windows · Mac</span>
       </div>
-      <a class="install-callout" href="install.html">
+      <a class="install-callout" href="app.html">
         <span class="ic" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15181f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m7 9 3 2-3 2"/><path d="M12 14h4"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15181f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>
         </span>
-        <span><b>Claude Code 가 아직 없으신가요?</b><small>처음이어도 10분이면 돼요 — 설치 가이드 보기</small></span>
+        <span><b>터미널이 낯설어도 괜찮아요</b><small>브라우저에서 대화하는 코치 앱 — 붙여넣기 한 번으로 설치</small></span>
         <span class="arrow">→</span>
       </a>
     </div>
@@ -72,6 +68,50 @@
     </div>
   </div>
 </div>
+
+
+<!-- ═══ 00 내 상황 고르기 ═══ -->
+<section id="choose" style="border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-num">00</span>
+      <h2>지금 내 상황은?</h2>
+      <p>가장 가까운 것 하나를 누르세요. 그 상황에 맞는 길만 안내해 드려요.</p>
+    </div>
+    <div class="choose">
+      <a class="card pick reveal" href="#plan-need">
+        <span class="pick-n">1</span>
+        <b>Claude 를 안 써봤거나, 무료로만 써봤어요</b>
+        <span>유료 플랜(Pro)이 먼저 필요해요</span>
+      </a>
+      <a class="card pick reveal recommended" href="app.html">
+        <span class="pick-n">2</span>
+        <b>유료 플랜은 있어요 <small>(Claude 앱·웹만 써봤어요)</small></b>
+        <span><em>추천</em> 코치 앱 설치 → 브라우저에서 대화</span>
+      </a>
+      <a class="card pick reveal" href="#start">
+        <span class="pick-n">3</span>
+        <b>Claude Code 를 이미 써요</b>
+        <span>키트 zip 받아서 터미널로 바로 시작 (코치 앱도 OK)</span>
+      </a>
+      <a class="card pick reveal" href="#on-phone">
+        <span class="pick-n">4</span>
+        <b>지금 휴대폰으로 보고 있어요</b>
+        <span>설치는 PC 에서 해야 해요 — PC 로 링크 보내기</span>
+      </a>
+    </div>
+
+    <div class="card side-note reveal" id="plan-need">
+      <h3>1 · 유료 플랜이 먼저 필요해요</h3>
+      <p>Claude 무료 플랜에서는 이 키트를 쓸 수 없어요. <a href="https://claude.ai/upgrade">claude.ai/upgrade</a> 에서 <b>Pro</b> 이상으로 바꾼 뒤, 위의 <b>2번</b>으로 진행하세요. 계정이 없으면 <a href="https://claude.ai">claude.ai</a> 에서 먼저 가입해요.</p>
+    </div>
+    <div class="card side-note reveal" id="on-phone">
+      <h3>4 · PC 로 이 페이지 보내기</h3>
+      <p>설치와 대화는 PC 에서 해요. 아래 버튼으로 주소를 복사해서 <b>카카오톡 '나와의 채팅'</b> 등으로 보내고, PC 에서 열어주세요.</p>
+      <div class="cmdbox"><code>https://hi8735.github.io/ai-automation-kit/</code><button class="copy" type="button">복사</button></div>
+    </div>
+  </div>
+</section>
 
 <!-- ═══ 01 한눈에 ═══ -->
 <section id="overview">
@@ -114,7 +154,7 @@
     </div>
     <div class="checks">
       <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>Claude 유료 플랜</b><span>Pro 이상. 무료 플랜에서는 Claude Code 를 쓸 수 없어요.</span></div></div>
-      <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>Claude Code</b><span>터미널에서 쓰는 Claude Code 가 필요해요. 없으면 <a href="install.html">설치 가이드</a>부터 (10분).</span></div></div>
+      <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>Claude Code 또는 코치 앱</b><span><a href="app.html">코치 앱</a>에는 들어 있어서 따로 설치할 필요 없어요. 터미널로 쓰실 때만 <a href="install.html">설치 가이드</a>를 보세요.</span></div></div>
       <div class="card check reveal"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-10"/></svg></span><div><b>30~60분</b><span>중간에 끊겨도 다시 이어서 할 수 있어요.</span></div></div>
       <div class="card check optional reveal"><span class="box"></span><div><b>업무 파일 샘플 (선택)</b><span>평소 쓰는 엑셀·문서·화면 캡처. 민감한 부분은 지운 사본이면 충분해요. 없어도 대화로 진행돼요.</span></div></div>
     </div>
@@ -126,8 +166,8 @@
   <div class="wrap narrow">
     <div class="sec-head reveal">
       <span class="sec-num">03</span>
-      <h2>시작하기</h2>
-      <p>내 컴퓨터에 맞는 탭을 골라 순서대로 따라 하세요.</p>
+      <h2>터미널로 시작하기</h2>
+      <p><b>Claude Code 를 이미 쓰는 분</b>을 위한 길이에요. 터미널이 낯설다면 <a href="app.html">코치 앱</a>이 더 쉬워요.</p>
     </div>
 
     <div data-tabs data-os-default>
@@ -513,7 +553,7 @@
       <p>여기 없는 문제는 어디서 어떻게 막혔는지(화면 캡처면 더 좋아요) 모임 채팅방에 남겨주세요.</p>
     </div>
     <div class="faq">
-      <details><summary>Claude Code 가 아직 없어요</summary><div class="ans"><p><a href="install.html">설치 가이드</a>를 따라 하시면 돼요. Claude 유료 플랜(Pro 이상)이 필요해요.</p></div></details>
+      <details><summary>Claude Code 가 아직 없어요 / 터미널이 어려워요</summary><div class="ans"><p><a href="app.html">코치 앱</a>을 설치하세요. 붙여넣기 한 번이면 되고, Claude Code 가 함께 들어 있어요. 터미널로 쓰고 싶다면 <a href="install.html">Claude Code 설치 가이드</a>를 보세요. 어느 쪽이든 Claude 유료 플랜(Pro 이상)이 필요해요.</p></div></details>
       <details><summary><code>/start</code> 를 쳤는데 반응이 이상해요</summary><div class="ans"><p>키트 폴더가 아닌 곳에서 실행했을 가능성이 커요. <code>CLAUDE.md</code> 파일과 <code>inputs</code> 폴더가 바로 보이는 폴더에서 다시 열어주세요. 압축을 풀었더니 폴더가 두 겹이 된 경우가 가장 흔해요.</p></div></details>
       <details><summary>중간에 창을 닫았어요 / 멈췄어요</summary><div class="ans"><p>같은 폴더에서 Claude Code 를 다시 열고 <code>/start</code>. 대화 내용이 단계마다 저장되어 있어서 멈춘 곳부터 이어져요.</p></div></details>
       <details><summary>"사용량 한도" 메시지가 나와요</summary><div class="ans"><p>플랜의 사용량을 다 쓴 거예요. 표시된 시간이 지난 뒤 다시 열고 <code>/start</code> 하면 이어집니다.</p></div></details>

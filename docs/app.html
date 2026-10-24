@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코치 앱 설치 — AI 업무자동화 키트</title>
+<meta name="description" content="터미널 없이 브라우저에서 쓰는 AI 업무자동화 코치. 붙여넣기 한 번으로 설치해요.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23e8590c'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='16' font-weight='700' fill='white'>/</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-mark">/</span>AI 업무자동화 키트</a>
+    <nav class="topnav" aria-label="이동"><a href="index.html">← 사용설명서로</a></nav>
+  </div>
+</header>
+
+<main>
+<div class="hero hero-install" style="padding-bottom:32px">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">터미널 몰라도 OK</span>
+      <h1>코치 앱 설치하기</h1>
+      <p class="lede">붙여넣기 <b>한 번</b>이면 설치가 끝나요. 그다음부터는 바탕화면 아이콘을 더블클릭하면 브라우저에 대화 화면이 열려요. Claude Code 를 따로 설치할 필요도 없어요.</p>
+      <div class="hero-meta" style="margin-top:0">
+        <span>걸리는 시간 <b>3~5분</b></span>
+        <span>필요한 것 <b>Claude 유료 플랜</b></span>
+        <span>관리자 권한 <b>필요 없음</b></span>
+      </div>
+    </div>
+    <div class="term" aria-label="코치 앱 화면 설명">
+      <div class="term-bar"><i></i><i></i><i></i><span>설치하면 이렇게 써요</span></div>
+      <div class="term-body">
+        <p class="t-line t-claude" style="animation-delay:.2s"><b>1.</b> 바탕화면 <b>AI 업무자동화 코치</b> 더블클릭</p>
+        <p class="t-line t-claude" style="animation-delay:.8s"><b>2.</b> 브라우저가 열리면 <b>Claude 계정으로 로그인</b> (처음 한 번)</p>
+        <p class="t-line t-claude" style="animation-delay:1.4s"><b>3.</b> <b>인터뷰 시작하기</b> 버튼 → 대화로 진행</p>
+        <p class="t-line t-dim" style="animation-delay:2s">파일은 화면 왼쪽에 끌어다 놓으면 돼요<span class="t-cursor"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section style="border-top:0;padding-top:24px">
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">01</span>
+      <h2>설치하기</h2>
+      <p>내 컴퓨터에 맞는 탭을 골라 순서대로 따라 하세요.</p>
+    </div>
+    <div data-tabs data-os-default>
+      <div class="tabs" role="tablist" aria-label="운영체제">
+        <button class="tab" role="tab" id="at-win" data-os="win" aria-controls="ap-win" aria-selected="true">Windows</button>
+        <button class="tab" role="tab" id="at-mac" data-os="mac" aria-controls="ap-mac" aria-selected="false" tabindex="-1">Mac</button>
+      </div>
+      <div class="tabpanel" id="ap-win" role="tabpanel" aria-labelledby="at-win">
+        <ol class="steps">
+          <li>
+            <h3>PowerShell 열기</h3>
+            <p>키보드의 <kbd>Windows</kbd> 키를 누르고 <code>PowerShell</code> 입력 → <b>Windows PowerShell</b> 클릭. 파란(또는 검은) 창이 열려요.</p>
+          </li>
+          <li>
+            <h3>아래 한 줄 붙여넣고 Enter</h3>
+            <p><b>복사</b>를 누르고, 창에서 <b>마우스 오른쪽 클릭</b>(또는 <kbd>Ctrl</kbd>+<kbd>V</kbd>) → <kbd>Enter</kbd>.</p>
+            <div class="cmdbox"><code>irm https://raw.githubusercontent.com/hi8735/ai-automation-kit/main/install/install.ps1 | iex</code><button class="copy" type="button">복사</button></div>
+            <p>[1/5] 부터 [5/5] 까지 진행 상황이 나와요. 처음엔 3~5분 걸려요. <b>창을 닫지 말고</b> 기다려주세요.</p>
+          </li>
+          <li>
+            <h3>브라우저에서 로그인</h3>
+            <p>설치가 끝나면 코치가 저절로 켜지고 브라우저가 열려요. <b>Claude 계정으로 로그인</b> 버튼을 누르고, 열린 창에서 로그인하면 자동으로 대화 화면으로 넘어가요.</p>
+            <div class="note info"><span class="ni">i</span><span>로그인 끝에 브라우저에 <b>코드</b>가 보이면, 복사해서 코치 화면의 "코드 붙여넣기" 칸에 넣어주세요.</span></div>
+          </li>
+          <li>
+            <h3>다음부터는 아이콘 더블클릭</h3>
+            <p>바탕화면의 <b>AI 업무자동화 코치</b> 아이콘을 더블클릭하면 돼요. 검은 창이 하나 같이 뜨는데, <b>그 창이 코치 엔진</b>이에요. 다 쓰고 닫으면 코치도 꺼져요.</p>
+          </li>
+        </ol>
+      </div>
+      <div class="tabpanel" id="ap-mac" role="tabpanel" aria-labelledby="at-mac" hidden>
+        <ol class="steps">
+          <li>
+            <h3>터미널 열기</h3>
+            <p><kbd>⌘ Command</kbd> + <kbd>Space</kbd> → <code>터미널</code> 입력 → Enter.</p>
+          </li>
+          <li>
+            <h3>아래 한 줄 붙여넣고 Enter</h3>
+            <div class="cmdbox"><code>curl -fsSL https://raw.githubusercontent.com/hi8735/ai-automation-kit/main/install/install.sh | bash</code><button class="copy" type="button">복사</button></div>
+            <p>[1/5] 부터 [5/5] 까지 진행 상황이 나와요. 처음엔 3~5분 걸려요.</p>
+          </li>
+          <li>
+            <h3>브라우저에서 로그인</h3>
+            <p>설치가 끝나면 코치가 켜지고 브라우저가 열려요. <b>Claude 계정으로 로그인</b> → 열린 창에서 로그인 → 자동으로 대화 화면.</p>
+          </li>
+          <li>
+            <h3>다음부터는 바탕화면 아이콘 더블클릭</h3>
+            <p>바탕화면의 <b>AI 업무자동화 코치</b> 를 더블클릭하면 터미널 창과 함께 브라우저가 열려요. 터미널 창을 닫으면 코치도 꺼져요.</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">02</span>
+      <h2>알아두면 좋아요</h2>
+    </div>
+    <div class="faq">
+      <details><summary>무엇이 어디에 설치되나요?</summary><div class="ans"><p>Windows 는 <code>C:\ai-kit</code>, Mac 은 홈 폴더의 <code>ai-kit</code> 한 곳에만 설치돼요. 코치 앱, 전용 파이썬, 키트가 모두 그 안에 있어요. 컴퓨터의 다른 곳은 건드리지 않아요.</p></div></details>
+      <details><summary>내가 넣은 파일과 기록은 어디 있어요?</summary><div class="ans"><p><code>ai-kit\workspace</code> 폴더 안의 <code>inputs</code>(넣은 파일), <code>results</code>(인터뷰 기록), <code>report</code>(리포트), <code>automations</code>(만든 자동화)예요. 코치 화면 왼쪽 "내 파일" 에서도 볼 수 있어요.</p></div></details>
+      <details><summary>새 버전으로 업데이트하려면요?</summary><div class="ans"><p>설치할 때 쓴 한 줄을 다시 붙여넣으면 돼요. 내 기록과 만든 자동화는 그대로 남아요.</p></div></details>
+      <details><summary>설치 중 빨간 글씨가 나왔어요</summary><div class="ans"><p>창 내용을 캡처해서 모임 채팅방에 올려주세요. 회사 PC 는 보안 프로그램이 설치를 막는 경우가 많아요. 그럴 땐 개인 PC 로 해보세요.</p></div></details>
+      <details><summary>브라우저가 안 열려요</summary><div class="ans"><p>브라우저 주소창에 <code>http://127.0.0.1:8790</code> 을 직접 입력하세요. 코치 창(검은 창)이 켜져 있어야 해요.</p></div></details>
+      <details><summary>지우고 싶어요</summary><div class="ans"><p>코치 창을 닫고, <code>ai-kit</code> 폴더와 바탕화면 아이콘을 지우면 끝이에요. 지우기 전에 필요한 기록은 따로 옮겨두세요.</p></div></details>
+      <details><summary>무료 플랜인데 쓸 수 있나요?</summary><div class="ans"><p>아쉽지만 안 돼요. Claude Pro 이상 플랜이 필요해요. 로그인하면 코치가 플랜을 확인해서 알려드려요.</p></div></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>AI 업무자동화 키트 · 코치 앱</span>
+    <span><a href="index.html">사용설명서</a> · <a href="https://github.com/hi8735/ai-automation-kit">GitHub</a></span>
+  </div>
+</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>
