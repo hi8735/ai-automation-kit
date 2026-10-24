@@ -224,6 +224,9 @@ def is_readonly_command(cmd: str) -> bool:
             return False
         if head in VERSION_CMDS and len(tokens) == 2 and tokens[1] in VERSION_ONLY:
             continue
+        # 따옴표로 쪼갠 경로('/'/서버/공유)는 풀고 나서 다시 확인한다
+        if any(re.search(r"[\\/]{2}", t) or t.startswith("\\") for t in tokens):
+            return False
         if head not in READONLY_CMDS or any(t in FOLLOW_FLAGS for t in tokens[1:]):
             return False
     return True
