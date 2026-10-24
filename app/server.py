@@ -199,7 +199,8 @@ DISCARD = re.compile(r"(?<!\S)(?:2>&1|\d?>\s*/dev/null|\d?>\s*nul)(?=\s|$|[;|])"
 
 def is_readonly_command(cmd: str) -> bool:
     """정말로 읽기만 하는 단순 명령인지 보수적으로 판단한다. 조금이라도 애매하면 False (= 사용자에게 묻는다)."""
-    if not cmd or re.search(r"[\n\r`$(){}<]", cmd) or "\\\\" in cmd:  # \\서버\공유 경로는 네트워크로 나간다
+    # \\서버\공유 · //서버/공유 · \\?\ 같은 경로는 네트워크·장치로 나가므로 슬래시 두 개가 붙어 있으면 묻는다
+    if not cmd or re.search(r"[\n\r`$(){}<]", cmd) or re.search(r"[\\/]{2}", cmd):
         return False
     cleaned = DISCARD.sub(" ", cmd)
     if ">" in cleaned:
