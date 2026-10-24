@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이 세션을 연 사람 — AI 업무자동화 키트</title>
+<meta name="description" content="개발 일의 대부분을 Claude 에게 맡기게 된 과정과, 다른 직무에도 그게 될지 궁금해서 연 세션 이야기.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23e8590c'/><text x='16' y='22' text-anchor='middle' font-family='monospace' font-size='16' font-weight='700' fill='white'>/</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-mark">/</span>AI 업무자동화 키트</a>
+    <nav class="topnav" aria-label="이동"><a href="index.html">← 사용설명서로</a></nav>
+  </div>
+</header>
+
+<main>
+<!-- ═══ 소개 ═══ -->
+<div class="hero about-hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">이 세션을 연 사람</span>
+      <h1>개발 일의 대부분을<br>Claude 에게 맡기고 나니,<br><em>다른 직무</em>가 궁금해졌어요</h1>
+      <p class="lede">오늘 쓰실 키트가 왜 이런 모양인지, 제 일에서는 실제로 어떻게 돌아가고 있는지 짧게 소개할게요.</p>
+    </div>
+    <div class="card profile">
+      <img class="profile-logo" src="assets/gangnamunni-logo.svg" width="182" height="40" alt="강남언니">
+      <p class="profile-name">노우영</p>
+      <p class="profile-role">Backend Lead</p>
+      <p class="profile-org"><b>힐링페이퍼</b> · 강남언니를 운영하는 회사</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 01 왜 ═══ -->
+<section style="border-top:1px solid var(--line)">
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">01</span>
+      <h2>왜 이 세션을 열었나</h2>
+    </div>
+    <div class="story reveal">
+      <p>저는 개발팀에서 백엔드를 이끌고 있어요. 지금은 일하는 환경이 꽤 탄탄하게 갖춰져서, <b>슬랙 메시지 하나만 읽혀도</b> Claude 가 노션 같은 곳에서 맥락을 찾아보고, 일을 작은 단위로 나눠 스스로 설계하고, 코드를 써서 리뷰 요청(PR)까지 올립니다.</p>
+      <p>문제가 생겼을 때도 비슷해요. 모니터링 도구, 코드, 데이터베이스를 함께 훑어서 원인을 빠르게 좁혀 오고, 손으로 하던 위험한 작업은 <b>정해진 절차(스킬)</b>로 만들어 두어서 예전보다 몇 배 안전하게 처리합니다.</p>
+      <p>그렇게 생긴 시간에 팀을 이끄는 일을 훨씬 많이 볼 수 있게 됐어요. 그러다 보니 궁금해졌습니다. <b>개발이 아닌 다른 직무에도 이런 자동화가 들어갈 자리가 있을까?</b></p>
+      <p>그래서 이 세션을 열었고, 감사하게도 정말 많은 분들이 와 주셔서 생각보다 훨씬 다양한 일을 같이 들여다볼 수 있게 됐어요.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 어떻게 ═══ -->
+<section>
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">02</span>
+      <h2>제 일은 이렇게 돌아가요</h2>
+      <p>회사 코드 전체를 한 폴더에 모아 두고, Claude 가 일할 때 필요한 것을 다섯 겹으로 깔아 뒀어요.</p>
+    </div>
+
+    <div class="layers reveal">
+      <div class="layer">
+        <span class="layer-n">1</span>
+        <div><b>맥락</b> — 무엇을 알고 일하나
+          <small>백엔드·웹·앱·배포 설정까지 회사 코드 전체 + 코드 지도, 도메인 위키, 일하는 규칙 문서. 신입 온보딩 자료를 Claude 에게 주는 셈이에요.</small></div>
+      </div>
+      <div class="layer">
+        <span class="layer-n">2</span>
+        <div><b>연결</b> — 어디를 직접 볼 수 있나
+          <small>슬랙, 노션, 지라, 깃허브, 모니터링 도구를 Claude 가 직접 읽어요. 사람이 복사해서 붙여 줄 필요가 없어요.</small></div>
+      </div>
+      <div class="layer">
+        <span class="layer-n">3</span>
+        <div><b>절차 (스킬)</b> — 어떻게 일하나
+          <small>"작업 쪼개기", "PR 올리기", "코드 리뷰", "장애 진단", "배포 감시", "아침 브리핑" 같은 일하는 방식을 40여 개의 절차로 적어 뒀어요.</small></div>
+      </div>
+      <div class="layer">
+        <span class="layer-n">4</span>
+        <div><b>안전장치</b> — 무엇은 하지 않나
+          <small>계획은 제가 확인한 뒤에 실행, 운영 데이터는 읽기만, 롤백 같은 결정은 경보만 하고 사람이 해요.</small></div>
+      </div>
+      <div class="layer">
+        <span class="layer-n">5</span>
+        <div><b>배움</b> — 다음엔 더 잘하게
+          <small>제가 "그게 아니라…" 하고 고쳐 준 것은 규칙이나 절차로 승격돼요. 하던 일은 인수인계 문서로 남겨서 다음 날 그대로 이어가요.</small></div>
+      </div>
+    </div>
+
+    <h3 class="flows-title reveal">그래서 하루 일이 이렇게 흘러가요</h3>
+    <div class="flows reveal">
+      <div class="card flow">
+        <span class="flow-tag">새 기능</span>
+        <ol><li>슬랙 요청 읽기</li><li>노션·지라에서 맥락 찾기</li><li>리뷰하기 좋은 크기로 작업 쪼개기</li><li><b>제가 계획 확인</b></li><li>코드 작성·테스트·규칙 검사</li><li>PR 올리기</li></ol>
+      </div>
+      <div class="card flow">
+        <span class="flow-tag">문제 발생</span>
+        <ol><li>알림 확인</li><li>모니터링 기록 훑기</li><li>관련 코드·데이터 확인</li><li>원인 좁히기·재현</li><li><b>제가 판단</b></li><li>수정 PR·회고 문서</li></ol>
+      </div>
+      <div class="card flow">
+        <span class="flow-tag">반복 수작업</span>
+        <ol><li>자주 하는 수동 작업 찾기</li><li>절차를 스킬로 적기</li><li>검증 단계 넣기</li><li>위험한 동작은 막기</li><li>다음부터 한 줄로 실행</li></ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 키트 ═══ -->
+<section>
+  <div class="wrap narrow">
+    <div class="sec-head reveal">
+      <span class="sec-num">03</span>
+      <h2>오늘 키트도 같은 구조예요</h2>
+      <p>규모만 작을 뿐, 여러분이 받은 키트도 같은 다섯 겹으로 만들었어요.</p>
+    </div>
+    <div class="map reveal">
+      <div class="map-row map-head"><span>제 업무 환경</span><span></span><span>오늘 키트</span></div>
+      <div class="map-row"><span>회사 코드·문서·규칙</span><span class="arrow-mid">→</span><span>인터뷰에서 정리한 <b>내 업무 기록</b></span></div>
+      <div class="map-row"><span>슬랙·노션·모니터링 연결</span><span class="arrow-mid">→</span><span><b>inputs</b> 폴더에 넣는 파일·캡처</span></div>
+      <div class="map-row"><span>40여 개 스킬</span><span class="arrow-mid">→</span><span><code>/start</code> <code>/build</code> <code>/run</code> <code>/report</code></span></div>
+      <div class="map-row"><span>계획 확인·운영 보호</span><span class="arrow-mid">→</span><span>허락 버튼, 원본 파일은 고치지 않기</span></div>
+      <div class="map-row"><span>배움·인수인계</span><span class="arrow-mid">→</span><span>만든 자동화를 <b>문서로 남겨</b> 다음에도 <code>/run</code></span></div>
+    </div>
+    <p class="map-cta reveal">처음부터 다섯 겹을 다 갖출 필요는 없어요. 오늘은 <b>내 일 하나를 정확히 적어 두는 것</b>부터 시작합니다.</p>
+    <div class="reveal"><a class="btn btn-primary" href="index.html#choose">내 상황에 맞게 시작하기 →</a></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>AI 업무자동화 키트 · 이 세션을 연 사람</span>
+    <span><a href="index.html">사용설명서</a> · <a href="https://github.com/hi8735/ai-automation-kit">GitHub</a></span>
+  </div>
+</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>
